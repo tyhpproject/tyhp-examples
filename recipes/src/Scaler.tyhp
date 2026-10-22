@@ -1,0 +1,21 @@
+<?tyhp
+namespace Recipes;
+
+class Scaler {
+    public function scale(Recipe $recipe, int $servings): array<Ingredient> {
+        if ($servings < 1 || $recipe->servings < 1) {
+            return $recipe->ingredients;
+        }
+        decimal $factor = \Tyhp\decimal($servings)->divide($recipe->servings, 6);
+        array<Ingredient> $scaled = [];
+        foreach ($recipe->ingredients as $ingredient) {
+            decimal $quantity = \Tyhp\decimal($ingredient->quantity)->multiply($factor);
+            $scaled[] = new Ingredient(
+                $quantity->round(2)->format(),
+                $ingredient->unit,
+                $ingredient->name,
+            );
+        }
+        return $scaled;
+    }
+}

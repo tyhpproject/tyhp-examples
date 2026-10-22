@@ -1,0 +1,11 @@
+<?tyhp
+namespace Inventory;
+
+$path = \getenv('INVENTORY_FILE');
+string $file = 'inventory.json';
+if ($path is string && $path->isNotEmpty()) {
+    $file = $path;
+}
+
+$cli = new Cli(new Catalog($file), new CsvImporter());
+exit($cli->run($argv));

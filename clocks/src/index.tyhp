@@ -1,0 +1,5 @@
+<?tyhp
+namespace Clocks;
+
+$cli = new Cli(new Format());
+exit($cli->run($argv));

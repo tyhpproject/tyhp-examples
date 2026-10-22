@@ -1,0 +1,9 @@
+<?tyhp
+namespace Toolbox;
+
+class Clock {
+    public function now(): string {
+        $clock = new \DateTimeImmutable('now');
+        return $clock->format(\DateTimeInterface::ATOM);
+    }
+}

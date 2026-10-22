@@ -1,0 +1,20 @@
+<?tyhp
+namespace Recipes;
+
+class Ingredient {
+    public function __construct(
+        public string $quantity,
+        public string $unit,
+        public string $name,
+    ): void {}
+}
+
+class Recipe {
+    public function __construct(
+        public int $id,
+        public string $title,
+        public int $servings,
+        public Course $course,
+        public array<Ingredient> $ingredients,
+    ): void {}
+}

@@ -1,0 +1,137 @@
+<?tyhp
+namespace Expenses;
+
+class Cli {
+    public function __construct(
+        private ExpenseStore $store,
+        private Ledger $ledger,
+    ): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && !$args[1]->isEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'add') {
+            return $this->add($args);
+        }
+        if ($command === 'list') {
+            return $this->list();
+        }
+        if ($command === 'total') {
+            return $this->total();
+        }
+        if ($command === 'remove') {
+            return $this->remove($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function add(array<int, string> $args): int {
+        if (!isset($args[2]) || !isset($args[3]) || !isset($args[4])) {
+            echo "Usage: add <payee> <category> <amount> [note]\n";
+            return 1;
+        }
+        string $payee = $args[2]->trim();
+        if ($payee->isEmpty()) {
+            echo "Payee is required.\n";
+            return 1;
+        }
+        string $categoryName = $args[3]->trim()->toLower();
+        $category = Category::tryFrom($categoryName);
+        if ($category === null) {
+            echo "Unknown category: {$categoryName}\n";
+            echo "Categories: food, travel, supplies, other\n";
+            return 1;
+        }
+        $amount = Money::parse($args[4]);
+        if ($amount === null) {
+            echo "Amount must be a positive decimal, such as 12.50.\n";
+            return 1;
+        }
+        array<int, string> $parts = [];
+        int $count = \count($args);
+        int $i = 5;
+        while ($i < $count) {
+            $part = $args[$i]->trim();
+            if (!$part->isEmpty()) {
+                $parts[] = $part;
+            }
+            $i++;
+        }
+        string $note = \implode(' ', $parts);
+        $expense = $this->store->add($payee, $category, $amount, $note);
+        string $shown = $expense->amount->format();
+        if ($expense->note->isEmpty()) {
+            echo "Added #{$expense->id}: {$expense->payee} {$shown}\n";
+        } else {
+            echo "Added #{$expense->id}: {$expense->payee} {$shown} ({$expense->note})\n";
+        }
+        return 0;
+    }
+
+    private function list(): int {
+        $expenses = $this->store->all();
+        if ($expenses === []) {
+            echo "No expenses yet.\n";
+            return 0;
+        }
+        foreach ($expenses as $expense) {
+            string $shown = $expense->amount->format();
+            echo "{$expense->id}\t{$expense->payee}\t{$expense->category->value}\t{$shown}\t{$expense->note}\n";
+        }
+        $this->printTotal($expenses);
+        return 0;
+    }
+
+    private function total(): int {
+        $this->printTotal($this->store->all());
+        return 0;
+    }
+
+    private function printTotal(array<Expense> $expenses): void {
+        decimal $total = $this->ledger->sum($expenses);
+        string $shown = $total->format();
+        echo "Total\t{$shown}\n";
+    }
+
+    private function remove(array<int, string> $args): int {
+        $id = $this->requireId($args);
+        if ($id === null) {
+            return 1;
+        }
+        if (!$this->store->remove($id)) {
+            echo "No expense #{$id}.\n";
+            return 1;
+        }
+        echo "Removed #{$id}.\n";
+        return 0;
+    }
+
+    private function requireId(array<int, string> $args): ?int {
+        if (!isset($args[2]) || !$args[2]->isNumeric()) {
+            echo "Usage: {$args[1]} <id>\n";
+            return null;
+        }
+        return $args[2]->__toInt();
+    }
+
+    private function help(): void {
+        echo "Expense tracker stored in a JSON file (EXPENSES_FILE, or expenses.json).\n\n";
+        echo "  add <payee> <category> <amount> [note]\n";
+        echo "  list\n";
+        echo "  total\n";
+        echo "  remove <id>\n";
+        echo "\n";
+        echo "Categories: food, travel, supplies, other\n";
+        echo "Amount is a positive decimal string, such as 12.50.\n";
+    }
+}

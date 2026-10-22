@@ -1,0 +1,22 @@
+{
+    "items": [
+        {
+            "sku": "WIDGET-1",
+            "name": "Blue widget",
+            "quantity": 10,
+            "location": "Aisle 3"
+        },
+        {
+            "sku": "BOLT-M8",
+            "name": "Bolt, M8",
+            "quantity": 200,
+            "location": "Bin 14"
+        },
+        {
+            "sku": "CABLE-USB",
+            "name": "USB cable",
+            "quantity": 0,
+            "location": "Shelf B"
+        }
+    ]
+}

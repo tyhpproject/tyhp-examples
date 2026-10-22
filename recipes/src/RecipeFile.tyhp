@@ -1,0 +1,20 @@
+<?tyhp
+namespace Recipes;
+
+type IngredientRecord = struct {
+    string $quantity = '0';
+    string $unit = '';
+    string $name = '';
+};
+
+type RecipeRecord = struct {
+    int $id = 0;
+    string $title = '';
+    int $servings = 1;
+    string $course = 'dinner';
+    array<IngredientRecord> $ingredients = [];
+};
+
+type RecipeBoxFile = struct {
+    array<RecipeRecord> $recipes = [];
+};

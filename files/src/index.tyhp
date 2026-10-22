@@ -1,0 +1,11 @@
+<?tyhp
+namespace Files;
+
+$path = \getenv('FILES_PATH');
+string $file = 'note.txt';
+if ($path is string && $path->isNotEmpty()) {
+    $file = $path;
+}
+
+$cli = new Cli($file);
+exit($cli->run($argv));

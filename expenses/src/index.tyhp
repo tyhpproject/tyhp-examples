@@ -1,0 +1,11 @@
+<?tyhp
+namespace Expenses;
+
+$path = \getenv('EXPENSES_FILE');
+string $file = 'expenses.json';
+if ($path is string && !$path->isEmpty()) {
+    $file = $path;
+}
+
+$cli = new Cli(new ExpenseStore($file), new Ledger());
+exit($cli->run($argv));

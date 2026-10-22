@@ -1,0 +1,5 @@
+<?tyhp
+namespace Sessions;
+
+$cli = new Cli();
+exit($cli->run($argv));

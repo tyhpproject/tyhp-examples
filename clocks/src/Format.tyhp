@@ -1,0 +1,29 @@
+<?tyhp
+namespace Clocks;
+
+type ClockShape = object {
+    public function now(): \DateTimeImmutable;
+};
+
+class FixedClock {
+    public function __construct(private string $moment): void {}
+
+    public function now(): \DateTimeImmutable {
+        return new \DateTimeImmutable($this->moment);
+    }
+}
+
+class Marker {
+    public function tag(): string {
+        return 'marker';
+    }
+}
+
+class Format {
+    public function describe(object $value): string {
+        if ($value is ClockShape) {
+            return $value->now()->format('c');
+        }
+        return 'not a clock';
+    }
+}

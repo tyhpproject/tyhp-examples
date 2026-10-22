@@ -1,0 +1,119 @@
+<?tyhp
+namespace Inventory;
+
+class Catalog {
+    public function __construct(private string $path): void {}
+
+    public function all(): array<Item> {
+        $file = $this->read();
+        array<Item> $items = [];
+        foreach ($file->items as $record) {
+            if ($record->sku->isEmpty()) {
+                continue;
+            }
+            $items[] = new Item($record->sku, $record->name, $record->quantity, $record->location);
+        }
+        return $items;
+    }
+
+    public function import(array<Item> $incoming): int {
+        $items = $this->all();
+        int $count = 0;
+        foreach ($incoming as $item) {
+            bool $replaced = false;
+            foreach ($items as $index => $existing) {
+                if ($existing->sku !== $item->sku) {
+                    continue;
+                }
+                $items[$index] = $item;
+                $replaced = true;
+                break;
+            }
+            if (!$replaced) {
+                $items[] = $item;
+            }
+            $count++;
+        }
+        $this->write($items);
+        return $count;
+    }
+
+    public function adjust(string $sku, int $delta): ?Item {
+        $items = $this->all();
+        ?Item $updated = null;
+        foreach ($items as $index => $item) {
+            if ($item->sku !== $sku) {
+                continue;
+            }
+            int $next = $item->quantity + $delta;
+            if ($next < 0) {
+                throw new \InvalidArgumentException('Quantity for ' . $sku . ' would become negative.');
+            }
+            $item->quantity = $next;
+            $items[$index] = $item;
+            $updated = $item;
+            break;
+        }
+        if ($updated === null) {
+            return null;
+        }
+        $this->write($items);
+        return $updated;
+    }
+
+    public function export(string $path): int {
+        $items = $this->all();
+        array<int, string> $lines = ['sku,name,quantity,location'];
+        foreach ($items as $item) {
+            $lines[] = $this->csv($item->sku)
+                . ',' . $this->csv($item->name)
+                . ',' . (string)$item->quantity
+                . ',' . $this->csv($item->location);
+        }
+        $written = \file_put_contents($path, \implode("\n", $lines) . "\n");
+        if ($written === false) {
+            throw new \RuntimeException('Could not write ' . $path);
+        }
+        return \count($items);
+    }
+
+    private function csv(string $value): string {
+        return '"' . $value->replace('"', '""') . '"';
+    }
+
+    private function read(): ItemFile {
+        if (!\is_file($this->path)) {
+            return new ItemFile();
+        }
+        $raw = \file_get_contents($this->path);
+        if ($raw === false || $raw->isEmpty()) {
+            return new ItemFile();
+        }
+        ItemFile $file = new ItemFile();
+        if (!$raw->jsonTryDecodeAs<ItemFile>($file)) {
+            return new ItemFile();
+        }
+        return $file;
+    }
+
+    private function write(array<Item> $items): void {
+        array<ItemRecord> $records = [];
+        foreach ($items as $item) {
+            $records[] = new ItemRecord() with [
+                sku => $item->sku,
+                name => $item->name,
+                quantity => $item->quantity,
+                location => $item->location,
+            ];
+        }
+        $file = new ItemFile() with [items => $records];
+        $json = \json_encode($file, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
+        if ($json === false) {
+            throw new \RuntimeException('Could not encode inventory.');
+        }
+        $written = \file_put_contents($this->path, $json . "\n");
+        if ($written === false) {
+            throw new \RuntimeException('Could not write ' . $this->path);
+        }
+    }
+}

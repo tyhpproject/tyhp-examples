@@ -1,0 +1,74 @@
+<?tyhp
+namespace Filters;
+
+class Cli {
+    public function __construct(private Roster $roster): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'adults') {
+            echo $this->roster->summary(fn ($person) => $person->age >= 18) . "\n";
+            return 0;
+        }
+        if ($command === 'city') {
+            return $this->city($args);
+        }
+        if ($command === 'column') {
+            return $this->column($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function city(array<int, string> $args): int {
+        if (!isset($args[2]) || $args[2]->trim()->isEmpty()) {
+            echo "Usage: city <name>\n";
+            return 1;
+        }
+        string $city = $args[2]->trim();
+        echo $this->roster->summary(fn ($person) => $person->city === $city) . "\n";
+        return 0;
+    }
+
+    private function column(array<int, string> $args): int {
+        if (!isset($args[2])) {
+            echo "Usage: column <name|age|city>\n";
+            return 1;
+        }
+        string $field = $args[2]->toLower();
+        if ($field === 'name') {
+            // @ with all types
+            echo $this->roster->column(fn (Person $person): string => $person->name) . "\n";
+            return 0;
+        }
+        if ($field === 'age') {
+            // @ return type is inferred
+            echo $this->roster->column(fn (Person $person) => $person->age) . "\n";
+            return 0;
+        }
+        if ($field === 'city') {
+            // @ shortest way to write the lambda
+            echo $this->roster->column(fn ($p) => $p->city) . "\n";
+            return 0;
+        }
+        echo "Usage: column <name|age|city>\n";
+        return 1;
+    }
+
+    private function help(): void {
+        echo "Reads an inline predicate as an expression tree, or prints a property path.\n\n";
+        echo "  adults              Print the property and operator for age >= 18\n";
+        echo "  city <name>         Print the property and operator for a city match\n";
+        echo "  column <field>      Property path for name, age, or city\n";
+    }
+}

@@ -1,0 +1,13 @@
+<?tyhp
+namespace Results;
+
+type TicketRecord = struct {
+    int $id = 0;
+    string $title = '';
+    string $requester = '';
+    string $state = 'open';
+};
+
+type TicketFile = struct {
+    array<TicketRecord> $tickets = [];
+};

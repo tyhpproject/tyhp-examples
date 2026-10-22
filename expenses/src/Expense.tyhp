@@ -1,0 +1,12 @@
+<?tyhp
+namespace Expenses;
+
+class Expense {
+    public function __construct(
+        public int $id,
+        public string $payee,
+        public Category $category,
+        public decimal $amount,
+        public string $note,
+    ): void {}
+}

@@ -1,0 +1,90 @@
+<?tyhp
+namespace Toolbox;
+
+class Cli {
+    public function __construct(
+        private Digests $digests,
+        private Clock $clock,
+    ): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'hash') {
+            return $this->hash($args);
+        }
+        if ($command === 'now') {
+            echo $this->clock->now() . "\n";
+            return 0;
+        }
+        if ($command === 'base64') {
+            return $this->base64($args);
+        }
+        if ($command === 'words') {
+            return $this->words($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function hash(array<int, string> $args): int {
+        if (!isset($args[2])) {
+            echo "Usage: hash <algorithm> <text>\n";
+            return 1;
+        }
+        $text = Text::join($args, 3);
+        if ($text->isEmpty()) {
+            echo "Usage: hash <algorithm> <text>\n";
+            return 1;
+        }
+        try {
+            echo $this->digests->hash($args[2]->toLower(), $text) . "\n";
+        } catch (\Throwable $e) {
+            echo $e->getMessage() . "\n";
+            return 1;
+        }
+        return 0;
+    }
+
+    private function base64(array<int, string> $args): int {
+        $text = Text::join($args, 2);
+        if ($text->isEmpty()) {
+            echo "Usage: base64 <text>\n";
+            return 1;
+        }
+        echo $text->base64Encode() . "\n";
+        return 0;
+    }
+
+    private function words(array<int, string> $args): int {
+        $text = Text::join($args, 2);
+        if ($text->isEmpty()) {
+            echo "Usage: words <text>\n";
+            return 1;
+        }
+        $count = $text->wordCount();
+        if (!($count is int)) {
+            echo "Could not count words.\n";
+            return 1;
+        }
+        echo (string)$count . "\n";
+        return 0;
+    }
+
+    private function help(): void {
+        echo "PHP standard-library helpers, called from Tyhp.\n\n";
+        echo "  hash <algorithm> <text>   \\hash(), after checking \\hash_algos()\n";
+        echo "  now                       \\DateTimeImmutable in ATOM format\n";
+        echo "  base64 <text>             string base64Encode()\n";
+        echo "  words <text>              string wordCount()\n";
+    }
+}

@@ -1,0 +1,117 @@
+<?tyhp
+namespace Recipes;
+
+class RecipeBox {
+    public function __construct(private string $path): void {}
+
+    public function all(): array<Recipe> {
+        $file = $this->read();
+        array<Recipe> $recipes = [];
+        foreach ($file->recipes as $record) {
+            $course = Course::tryFrom($record->course);
+            if ($course === null) {
+                $course = Course::Dinner;
+            }
+            array<Ingredient> $ingredients = [];
+            foreach ($record->ingredients as $line) {
+                $ingredients[] = new Ingredient($line->quantity, $line->unit, $line->name);
+            }
+            $recipes[] = new Recipe(
+                $record->id,
+                $record->title,
+                $record->servings,
+                $course,
+                $ingredients,
+            );
+        }
+        return $recipes;
+    }
+
+    public function find(int $id): ?Recipe {
+        foreach ($this->all() as $recipe) {
+            if ($recipe->id === $id) {
+                return $recipe;
+            }
+        }
+        return null;
+    }
+
+    public function add(string $title, int $servings, Course $course): Recipe {
+        $recipes = $this->all();
+        int $nextId = 1;
+        foreach ($recipes as $recipe) {
+            if ($recipe->id >= $nextId) {
+                $nextId = $recipe->id + 1;
+            }
+        }
+        array<Ingredient> $none = [];
+        $created = new Recipe($nextId, $title, $servings, $course, $none);
+        $recipes[] = $created;
+        $this->write($recipes);
+        return $created;
+    }
+
+    public function addIngredient(int $id, Ingredient $ingredient): ?Recipe {
+        $recipes = $this->all();
+        ?Recipe $updated = null;
+        foreach ($recipes as $index => $recipe) {
+            if ($recipe->id !== $id) {
+                continue;
+            }
+            $recipe->ingredients[] = $ingredient;
+            $recipes[$index] = $recipe;
+            $updated = $recipe;
+            break;
+        }
+        if ($updated === null) {
+            return null;
+        }
+        $this->write($recipes);
+        return $updated;
+    }
+
+    private function read(): RecipeBoxFile {
+        if (!\is_file($this->path)) {
+            return new RecipeBoxFile();
+        }
+        $raw = \file_get_contents($this->path);
+        if ($raw === false || $raw->isEmpty()) {
+            return new RecipeBoxFile();
+        }
+        RecipeBoxFile $file = new RecipeBoxFile();
+        if (!$raw->jsonTryDecodeAs<RecipeBoxFile>($file)) {
+            return new RecipeBoxFile();
+        }
+        return $file;
+    }
+
+    private function write(array<Recipe> $recipes): void {
+        array<RecipeRecord> $records = [];
+        foreach ($recipes as $recipe) {
+            array<IngredientRecord> $lines = [];
+            foreach ($recipe->ingredients as $ingredient) {
+                $lines[] = new IngredientRecord() with [
+                    quantity => $ingredient->quantity,
+                    unit => $ingredient->unit,
+                    name => $ingredient->name,
+                ];
+            }
+            $records[] = new RecipeRecord() with [
+                id => $recipe->id,
+                title => $recipe->title,
+                servings => $recipe->servings,
+                course => $recipe->course->value,
+                ingredients => $lines,
+            ];
+        }
+        $file = new RecipeBoxFile() with [recipes => $records];
+        $json = \json_encode($file, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
+        if ($json === false) {
+            throw new \RuntimeException('Could not encode recipes.');
+        }
+        $written = \file_put_contents($this->path, $json . "\n");
+        if ($written === false) {
+            throw new \RuntimeException('Could not write ' . $this->path);
+        }
+    }
+}

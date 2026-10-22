@@ -1,0 +1,7 @@
+<?tyhp
+namespace Todo;
+
+enum TaskStatus: string {
+    case Open = 'open';
+    case Done = 'done';
+}

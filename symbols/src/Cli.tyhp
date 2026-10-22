@@ -1,0 +1,31 @@
+<?tyhp
+namespace Symbols;
+
+class Cli {
+    public function __construct(private Report $report): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'show') {
+            $this->report->show();
+            return 0;
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function help(): void {
+        echo "Prints names, defaults, and a type taken from compile-time constructs.\n\n";
+        echo "  show   Print Reading, label, MAX, text, 0, [], int, and reading yes\n";
+    }
+}

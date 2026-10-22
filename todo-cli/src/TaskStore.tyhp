@@ -1,0 +1,104 @@
+<?tyhp
+namespace Todo;
+
+class TaskStore {
+    public function __construct(private string $path): void {}
+
+    public function all(): array<Task> {
+        $file = $this->read();
+        array<Task> $tasks = [];
+        foreach ($file->tasks as $record) {
+            $status = TaskStatus::tryFrom($record->status);
+            if ($status === null) {
+                $status = TaskStatus::Open;
+            }
+            $tasks[] = new Task($record->id, $record->title, $status, $record->createdAt);
+        }
+        return $tasks;
+    }
+
+    public function add(string $title): Task {
+        $tasks = $this->all();
+        int $nextId = 1;
+        foreach ($tasks as $task) {
+            if ($task->id >= $nextId) {
+                $nextId = $task->id + 1;
+            }
+        }
+        $created = new Task($nextId, $title, TaskStatus::Open, \gmdate('c'));
+        $tasks[] = $created;
+        $this->write($tasks);
+        return $created;
+    }
+
+    public function setStatus(int $id, TaskStatus $status): ?Task {
+        $tasks = $this->all();
+        ?Task $updated = null;
+        foreach ($tasks as $index => $task) {
+            if ($task->id === $id) {
+                $task->status = $status;
+                $tasks[$index] = $task;
+                $updated = $task;
+                break;
+            }
+        }
+        if ($updated === null) {
+            return null;
+        }
+        $this->write($tasks);
+        return $updated;
+    }
+
+    public function remove(int $id): bool {
+        $tasks = $this->all();
+        array<Task> $kept = [];
+        bool $found = false;
+        foreach ($tasks as $task) {
+            if ($task->id === $id) {
+                $found = true;
+                continue;
+            }
+            $kept[] = $task;
+        }
+        if ($found) {
+            $this->write($kept);
+        }
+        return $found;
+    }
+
+    private function read(): TaskFile {
+        if (!\is_file($this->path)) {
+            return new TaskFile();
+        }
+        $raw = \file_get_contents($this->path);
+        if ($raw === false || $raw->isEmpty()) {
+            return new TaskFile();
+        }
+        TaskFile $file = new TaskFile();
+        if (!$raw->jsonTryDecodeAs<TaskFile>($file)) {
+            return new TaskFile();
+        }
+        return $file;
+    }
+
+    private function write(array<Task> $tasks): void {
+        array<TaskRecord> $records = [];
+        foreach ($tasks as $task) {
+            $records[] = new TaskRecord() with [
+                id => $task->id,
+                title => $task->title,
+                status => $task->status->value,
+                createdAt => $task->createdAt,
+            ];
+        }
+        $file = new TaskFile() with [tasks => $records];
+        $json = \json_encode($file, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
+        if ($json === false) {
+            throw new \RuntimeException('Could not encode todos.');
+        }
+        $written = \file_put_contents($this->path, $json . "\n");
+        if ($written === false) {
+            throw new \RuntimeException('Could not write ' . $this->path);
+        }
+    }
+}

@@ -1,0 +1,119 @@
+<?tyhp
+namespace Inventory;
+
+class Cli {
+    public function __construct(
+        private Catalog $catalog,
+        private CsvImporter $importer,
+    ): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'import') {
+            return $this->import($args);
+        }
+        if ($command === 'list') {
+            return $this->list();
+        }
+        if ($command === 'adjust') {
+            return $this->adjust($args);
+        }
+        if ($command === 'export') {
+            return $this->export($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function import(array<int, string> $args): int {
+        if (!isset($args[2]) || $args[2]->isEmpty()) {
+            echo "Usage: import <file.csv>\n";
+            return 1;
+        }
+        try {
+            $items = $this->importer->read($args[2]);
+            int $count = $this->catalog->import($items);
+        } catch (\Throwable $e) {
+            echo $e->getMessage() . "\n";
+            return 1;
+        }
+        foreach ($this->importer->errors as $error) {
+            echo $error . "\n";
+        }
+        echo "Imported {$count} rows.\n";
+        if ($this->importer->errors !== []) {
+            return 1;
+        }
+        return 0;
+    }
+
+    private function list(): int {
+        $items = $this->catalog->all();
+        if ($items === []) {
+            echo "Catalog is empty.\n";
+            return 0;
+        }
+        foreach ($items as $item) {
+            echo "{$item->sku}\t{$item->quantity}\t{$item->location}\t{$item->name}\n";
+        }
+        return 0;
+    }
+
+    private function adjust(array<int, string> $args): int {
+        if (!isset($args[2]) || $args[2]->trim()->isEmpty() || !isset($args[3])) {
+            echo "Usage: adjust <sku> <delta>\n";
+            return 1;
+        }
+        $delta = Integers::parse($args[3]);
+        if ($delta === null) {
+            echo "Delta is not an integer.\n";
+            return 1;
+        }
+        try {
+            $item = $this->catalog->adjust($args[2]->trim(), $delta);
+        } catch (\Throwable $e) {
+            echo $e->getMessage() . "\n";
+            return 1;
+        }
+        if ($item === null) {
+            echo "No SKU {$args[2]}.\n";
+            return 1;
+        }
+        echo "{$item->sku} is now {$item->quantity}.\n";
+        return 0;
+    }
+
+    private function export(array<int, string> $args): int {
+        if (!isset($args[2]) || $args[2]->isEmpty()) {
+            echo "Usage: export <file.csv>\n";
+            return 1;
+        }
+        try {
+            int $count = $this->catalog->export($args[2]);
+            echo "Exported {$count} rows to {$args[2]}.\n";
+        } catch (\Throwable $e) {
+            echo $e->getMessage() . "\n";
+            return 1;
+        }
+        return 0;
+    }
+
+    private function help(): void {
+        echo "Inventory catalog (INVENTORY_FILE, or inventory.json).\n";
+        echo "CSV columns: sku, name, quantity, location.\n\n";
+        echo "  import <file.csv>       Load or replace rows by SKU\n";
+        echo "  list                    Print the catalog\n";
+        echo "  adjust <sku> <delta>    Add or subtract quantity\n";
+        echo "  export <file.csv>       Write the catalog as CSV\n";
+    }
+}

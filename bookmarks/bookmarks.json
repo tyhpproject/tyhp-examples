@@ -1,0 +1,15 @@
+{
+    "bookmarks": [
+        {
+            "id": 1,
+            "title": "Tyhp docs",
+            "url": "https://tyhplang.com",
+            "tags": [
+                "docs",
+                "tyhp"
+            ],
+            "note": "language site",
+            "savedAt": "2026-10-21T20:34:09+00:00"
+        }
+    ]
+}

@@ -1,0 +1,125 @@
+<?tyhp
+namespace Todo;
+
+class Cli {
+    public function __construct(private TaskStore $store): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'add') {
+            return $this->add($args);
+        }
+        if ($command === 'list') {
+            return $this->list($args);
+        }
+        if ($command === 'done') {
+            return $this->mark($args, TaskStatus::Done);
+        }
+        if ($command === 'reopen') {
+            return $this->mark($args, TaskStatus::Open);
+        }
+        if ($command === 'remove') {
+            return $this->remove($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function add(array<int, string> $args): int {
+        if (!isset($args[2])) {
+            echo "Usage: add <title>\n";
+            return 1;
+        }
+        array<int, string> $parts = [];
+        int $count = \count($args);
+        int $i = 2;
+        while ($i < $count) {
+            $part = $args[$i]->trim();
+            if ($part->isNotEmpty()) {
+                $parts[] = $part;
+            }
+            $i++;
+        }
+        if ($parts === []) {
+            echo "Usage: add <title>\n";
+            return 1;
+        }
+        string $title = \implode(' ', $parts);
+        $task = $this->store->add($title);
+        echo "Added #{$task->id}: {$task->title}\n";
+        return 0;
+    }
+
+    private function list(array<int, string> $args): int {
+        bool $openOnly = isset($args[2]) && $args[2] === '--open';
+        $tasks = $this->store->all();
+        int $shown = 0;
+        foreach ($tasks as $task) {
+            if ($openOnly && $task->isDone()) {
+                continue;
+            }
+            $mark = $task->isDone() ? 'done' : 'open';
+            echo "{$task->id}\t{$mark}\t{$task->title}\n";
+            $shown++;
+        }
+        if ($shown === 0) {
+            echo $openOnly ? "No open tasks.\n" : "No tasks yet.\n";
+        }
+        return 0;
+    }
+
+    private function mark(array<int, string> $args, TaskStatus $status): int {
+        $id = $this->requireId($args);
+        if ($id === null) {
+            return 1;
+        }
+        $task = $this->store->setStatus($id, $status);
+        if ($task === null) {
+            echo "No task #{$id}.\n";
+            return 1;
+        }
+        $label = $status === TaskStatus::Done ? 'Done' : 'Reopened';
+        echo "{$label} #{$task->id}: {$task->title}\n";
+        return 0;
+    }
+
+    private function remove(array<int, string> $args): int {
+        $id = $this->requireId($args);
+        if ($id === null) {
+            return 1;
+        }
+        if (!$this->store->remove($id)) {
+            echo "No task #{$id}.\n";
+            return 1;
+        }
+        echo "Removed #{$id}.\n";
+        return 0;
+    }
+
+    private function requireId(array<int, string> $args): ?int {
+        if (!isset($args[2]) || !$args[2]->isNumeric()) {
+            echo "Usage: {$args[1]} <id>\n";
+            return null;
+        }
+        return $args[2]->__toInt();
+    }
+
+    private function help(): void {
+        echo "Todo list stored in a JSON file (TODO_FILE, or todos.json).\n\n";
+        echo "  add <title>     Add a task\n";
+        echo "  list [--open]   List tasks\n";
+        echo "  done <id>       Mark a task done\n";
+        echo "  reopen <id>     Mark a task open\n";
+        echo "  remove <id>     Delete a task\n";
+    }
+}

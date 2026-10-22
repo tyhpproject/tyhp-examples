@@ -1,0 +1,43 @@
+<?tyhp
+namespace Results;
+
+class Result<T> {
+    public function __construct(
+        private bool $ok,
+        private ?T $value,
+        private ?string $error,
+    ): void {}
+
+    public function isOk(): bool {
+        return $this->ok;
+    }
+
+    public function value(): ?T {
+        return $this->value;
+    }
+
+    public function error(): ?string {
+        return $this->error;
+    }
+
+    public function map<U>(callable(T): U $fn): Result<U> {
+        if (!$this->ok || $this->value === null) {
+            string $message = 'Failed.';
+            if ($this->error !== null) {
+                $message = $this->error;
+            }
+            return ResultFactory::failure<U>($message);
+        }
+        return ResultFactory::success<U>($fn($this->value));
+    }
+}
+
+class ResultFactory {
+    public static function success<T>(T $value): Result<T> {
+        return new Result<T>(true, $value, null);
+    }
+
+    public static function failure<T>(string $error): Result<T> {
+        return new Result<T>(false, null, $error);
+    }
+}

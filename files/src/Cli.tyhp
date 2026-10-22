@@ -1,0 +1,89 @@
+<?tyhp
+namespace Files;
+
+use Tyhp\EventLoop;
+use Tyhp\Io\File\File;
+
+class Cli {
+    public function __construct(private string $path): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'write') {
+            return $this->write($args);
+        }
+        if ($command === 'read') {
+            return $this->read();
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function write(array<int, string> $args): int {
+        string $text = $this->join($args, 2);
+        if ($text->isEmpty()) {
+            echo "Usage: write <text>\n";
+            return 1;
+        }
+        string $path = $this->path;
+        try {
+            string $written = EventLoop::getInstance()->run($this->writeFile($path, $text));
+            echo "wrote {$written}\n";
+        } catch (\Throwable $e) {
+            echo $e->getMessage() . "\n";
+            return 1;
+        }
+        return 0;
+    }
+
+    private function read(): int {
+        string $path = $this->path;
+        try {
+            string $contents = EventLoop::getInstance()->run($this->readFile($path));
+            echo $contents;
+        } catch (\Throwable $e) {
+            echo $e->getMessage() . "\n";
+            return 1;
+        }
+        return 0;
+    }
+
+    private async function writeFile(string $path, string $text): string {
+        await File::writeAsync($path, $text . "\n");
+        return $path;
+    }
+
+    private async function readFile(string $path): string {
+        return await File::readAsync($path);
+    }
+
+    private function join(array<int, string> $args, int $start): string {
+        array<int, string> $parts = [];
+        int $count = \count($args);
+        int $i = $start;
+        while ($i < $count) {
+            $part = $args[$i]->trim();
+            if ($part->isNotEmpty()) {
+                $parts[] = $part;
+            }
+            $i++;
+        }
+        return \implode(' ', $parts);
+    }
+
+    private function help(): void {
+        echo "Reads and writes one text file with tyhp/io (FILES_PATH, or note.txt).\n\n";
+        echo "  write <text>   Replace the file\n";
+        echo "  read           Print the file\n";
+    }
+}

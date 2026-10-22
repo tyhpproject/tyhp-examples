@@ -1,0 +1,29 @@
+{
+  "include": [
+    "src/**/*.tyhp"
+  ],
+  "exclude": [
+    "vendor/**",
+    "node_modules/**"
+  ],
+  "tyhpdefInclude": [
+    "./vendor-tyhpdef/graham-campbell.result-type.tyhpdef",
+    "./vendor-tyhpdef/phpoption.phpoption.tyhpdef",
+    "./vendor-tyhpdef/symfony.polyfill-mbstring.tyhpdef"
+  ],
+  "overlay": [
+    "./tyhpdef/**/*.tyhpdef"
+  ],
+  "source": {
+    "tagless": false
+  },
+  "output": {
+    "path": "build/",
+    "phpVersion": "8.5",
+    "strictTypes": true,
+    "comments": true
+  },
+  "psr4": {
+    "ConfigTool\\": "src/"
+  }
+}

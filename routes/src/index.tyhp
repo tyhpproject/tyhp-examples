@@ -1,0 +1,5 @@
+<?tyhp
+namespace Routes;
+
+$cli = new Cli(new Paths());
+exit($cli->run($argv));

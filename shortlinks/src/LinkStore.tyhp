@@ -1,0 +1,93 @@
+<?tyhp
+namespace Shortlinks;
+
+class LinkStore {
+    public function __construct(private string $path): void {}
+
+    public function all(): array<Link> {
+        $file = $this->read();
+        array<Link> $links = [];
+        foreach ($file->links as $record) {
+            if ($record->code->isEmpty() || $record->target->isEmpty()) {
+                continue;
+            }
+            $links[] = new Link($record->code, $record->target, $record->createdAt);
+        }
+        return $links;
+    }
+
+    public function find(string $code): ?Link {
+        foreach ($this->all() as $link) {
+            if ($link->code === $code) {
+                return $link;
+            }
+        }
+        return null;
+    }
+
+    public function add(string $code, string $target): Link {
+        $links = $this->all();
+        array<Link> $kept = [];
+        foreach ($links as $link) {
+            if ($link->code !== $code) {
+                $kept[] = $link;
+            }
+        }
+        $created = new Link($code, $target, \gmdate('c'));
+        $kept[] = $created;
+        $this->write($kept);
+        return $created;
+    }
+
+    public function remove(string $code): bool {
+        $links = $this->all();
+        array<Link> $kept = [];
+        bool $found = false;
+        foreach ($links as $link) {
+            if ($link->code === $code) {
+                $found = true;
+                continue;
+            }
+            $kept[] = $link;
+        }
+        if ($found) {
+            $this->write($kept);
+        }
+        return $found;
+    }
+
+    private function read(): LinkFile {
+        if (!\is_file($this->path)) {
+            return new LinkFile();
+        }
+        $raw = \file_get_contents($this->path);
+        if ($raw === false || $raw->isEmpty()) {
+            return new LinkFile();
+        }
+        LinkFile $file = new LinkFile();
+        if (!$raw->jsonTryDecodeAs<LinkFile>($file)) {
+            return new LinkFile();
+        }
+        return $file;
+    }
+
+    private function write(array<Link> $links): void {
+        array<LinkRecord> $records = [];
+        foreach ($links as $link) {
+            $records[] = new LinkRecord() with [
+                code => $link->code,
+                target => $link->target,
+                createdAt => $link->createdAt,
+            ];
+        }
+        $file = new LinkFile() with [links => $records];
+        $json = \json_encode($file, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
+        if ($json === false) {
+            throw new \RuntimeException('Could not encode links.');
+        }
+        $written = \file_put_contents($this->path, $json . "\n");
+        if ($written === false) {
+            throw new \RuntimeException('Could not write ' . $this->path);
+        }
+    }
+}

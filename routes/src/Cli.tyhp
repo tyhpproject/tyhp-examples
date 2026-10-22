@@ -1,0 +1,36 @@
+<?tyhp
+namespace Routes;
+
+class Cli {
+    public function __construct(private Paths $paths): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'widgets') {
+            echo $this->paths->widgets() . "\n";
+            return 0;
+        }
+        if ($command === 'orders') {
+            echo $this->paths->orders() . "\n";
+            return 0;
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function help(): void {
+        echo "Prints API paths. Each result is the template string api/\${string}/items.\n\n";
+        echo "  widgets   Print api/widgets/items\n";
+        echo "  orders    Print api/orders/items\n";
+    }
+}

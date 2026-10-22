@@ -1,0 +1,11 @@
+<?tyhp 
+namespace Bookmarks;
+
+$path = \getenv('BOOKMARKS_FILE');
+string $file = 'bookmarks.json';
+if ($path is string && !$path->isEmpty()) {
+    $file = $path;
+}
+
+$cli = new Cli(new BookmarkStore($file));
+exit($cli->run($argv));

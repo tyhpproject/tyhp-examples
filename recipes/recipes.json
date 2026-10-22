@@ -1,0 +1,24 @@
+{
+    "recipes": [
+        {
+            "id": 1,
+            "title": "Weeknight chili",
+            "servings": 4,
+            "course": "dinner",
+            "ingredients": [
+                {
+                    "quantity": "2",
+                    "unit": "cup",
+                    "name": "broth"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "title": "Weeknight chili",
+            "servings": 4,
+            "course": "dinner",
+            "ingredients": []
+        }
+    ]
+}

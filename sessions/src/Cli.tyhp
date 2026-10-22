@@ -1,0 +1,48 @@
+<?tyhp
+namespace Sessions;
+
+class Cli {
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'open') {
+            $this->open();
+            return 0;
+        }
+        if ($command === 'block') {
+            $this->block();
+            return 0;
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function open(): void {
+        $first := new Log('first');
+        $second := new Log('second');
+        echo $first->line('ready') . "\n";
+        echo $second->line('ready') . "\n";
+    }
+
+    private function block(): void {
+        using ($log = new Log('block')) {
+            echo $log->line('inside') . "\n";
+        }
+        echo "after\n";
+    }
+
+    private function help(): void {
+        echo "Opens disposable logs and closes them when the scope ends.\n\n";
+        echo "  open    Print two ready lines, then close second and first\n";
+        echo "  block   Print the inside line, close the log, then print after\n";
+    }
+}

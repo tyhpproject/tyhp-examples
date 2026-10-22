@@ -1,0 +1,21 @@
+<?tyhp
+namespace Results;
+
+class MemoryRepository<T> {
+    public function __construct(private array<int, T> $rows): void {}
+
+    public function find(int $id): Result<T> {
+        if (!isset($this->rows[$id])) {
+            return ResultFactory::failure<T>('No row %d'->format($id));
+        }
+        return ResultFactory::success<T>($this->rows[$id]);
+    }
+
+    public function put(int $id, T $row): void {
+        $this->rows[$id] = $row;
+    }
+
+    public function rows(): array<int, T> {
+        return $this->rows;
+    }
+}

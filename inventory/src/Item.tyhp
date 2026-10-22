@@ -1,0 +1,11 @@
+<?tyhp
+namespace Inventory;
+
+class Item {
+    public function __construct(
+        public string $sku,
+        public string $name,
+        public int $quantity,
+        public string $location,
+    ): void {}
+}

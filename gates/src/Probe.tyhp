@@ -1,0 +1,38 @@
+<?tyhp
+namespace Gates;
+
+class Probe {
+    public function length(string $text): string {
+        string $kind = 'bytes';
+        int $count = \strlen($text);
+        declare(ext="mbstring") {
+            $kind = 'mbstring';
+            $count = \mb_strlen($text, 'UTF-8');
+        }
+        declare(ext="!mbstring") {
+            $kind = 'bytes';
+            $count = \strlen($text);
+        }
+        return $kind . ' ' . (string)$count;
+    }
+
+    public function phpLabel(): string {
+        string $label = 'other';
+        declare(php="8.5") {
+            $label = '8.5';
+        }
+        declare(php=">=8.6") {
+            $label = '8.6+';
+        }
+        return $label;
+    }
+
+    #[\Tyhp\Php(">=8.5")]
+    public function first(array<int, string> $items): string {
+        ?string $found = \array_first($items);
+        if ($found === null) {
+            return '';
+        }
+        return $found;
+    }
+}

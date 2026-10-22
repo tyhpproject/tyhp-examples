@@ -1,0 +1,5 @@
+<?tyhp
+namespace Vectors;
+
+$cli = new Cli();
+exit($cli->run($argv));

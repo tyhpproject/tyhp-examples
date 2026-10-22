@@ -1,0 +1,25 @@
+<?tyhp
+namespace Symbols;
+
+class Reading {
+    public const int MAX = 100;
+    public string $label = 'temp';
+
+    public function text(): string {
+        return $this->label;
+    }
+}
+
+class Report {
+    public function show(): void {
+        Reading $reading = new Reading();
+        echo nameof(Reading) . "\n";
+        echo nameof($reading->label) . "\n";
+        echo nameof(Reading::MAX) . "\n";
+        echo nameof($reading->text) . "\n";
+        echo (string)default(int) . "\n";
+        echo '[' . default(string) . "]\n";
+        echo (string)typeof(int) . "\n";
+        echo (variable_exists($reading) ? 'reading yes' : 'reading no') . "\n";
+    }
+}

@@ -1,0 +1,98 @@
+<?tyhp
+namespace Expenses;
+
+class ExpenseStore {
+    public function __construct(private string $path): void {}
+
+    public function all(): array<Expense> {
+        $file = $this->read();
+        array<Expense> $expenses = [];
+        foreach ($file->expenses as $record) {
+            $category = Category::tryFrom($record->category);
+            if ($category === null) {
+                $category = Category::Other;
+            }
+            $amount = Money::parse($record->amount);
+            if ($amount === null) {
+                throw new \RuntimeException('Invalid amount in ' . $this->path);
+            }
+            $expenses[] = new Expense(
+                $record->id,
+                $record->payee,
+                $category,
+                $amount,
+                $record->note,
+            );
+        }
+        return $expenses;
+    }
+
+    public function add(string $payee, Category $category, decimal $amount, string $note): Expense {
+        $expenses = $this->all();
+        int $nextId = 1;
+        foreach ($expenses as $expense) {
+            if ($expense->id >= $nextId) {
+                $nextId = $expense->id + 1;
+            }
+        }
+        $created = new Expense($nextId, $payee, $category, $amount, $note);
+        $expenses[] = $created;
+        $this->write($expenses);
+        return $created;
+    }
+
+    public function remove(int $id): bool {
+        $expenses = $this->all();
+        array<Expense> $kept = [];
+        bool $found = false;
+        foreach ($expenses as $expense) {
+            if ($expense->id === $id) {
+                $found = true;
+                continue;
+            }
+            $kept[] = $expense;
+        }
+        if ($found) {
+            $this->write($kept);
+        }
+        return $found;
+    }
+
+    private function read(): ExpenseFile {
+        if (!\is_file($this->path)) {
+            return new ExpenseFile();
+        }
+        $raw = \file_get_contents($this->path);
+        if ($raw === false) {
+            throw new \RuntimeException('Could not read ' . $this->path);
+        }
+        if ($raw->isEmpty()) {
+            return new ExpenseFile();
+        }
+        ExpenseFile $loaded = new ExpenseFile();
+        if (!$raw->jsonTryDecodeAs<ExpenseFile>($loaded)) {
+            throw new \RuntimeException('Could not read expenses from ' . $this->path);
+        }
+        return $loaded;
+    }
+
+    private function write(array<Expense> $expenses): void {
+        array<ExpenseRecord> $records = [];
+        foreach ($expenses as $expense) {
+            string $amount = $expense->amount->format(2, '.', '');
+            $records[] = new ExpenseRecord() with [
+                id => $expense->id,
+                payee => $expense->payee,
+                category => $expense->category->value,
+                amount => $amount,
+                note => $expense->note,
+            ];
+        }
+        $file = new ExpenseFile() with [expenses => $records];
+        $json = \json_encode($file, \JSON_THROW_ON_ERROR);
+        $written = \file_put_contents($this->path, $json . "\n");
+        if ($written === false) {
+            throw new \RuntimeException('Could not write ' . $this->path);
+        }
+    }
+}

@@ -1,0 +1,5 @@
+<?tyhp
+namespace AsyncJobs;
+
+$cli = new Cli(new Greetings());
+exit($cli->run($argv));

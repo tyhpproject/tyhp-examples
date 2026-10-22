@@ -1,0 +1,10 @@
+<?tyhp
+namespace Filters;
+
+class Person {
+    public function __construct(
+        public string $name,
+        public int $age,
+        public string $city,
+    ): void {}
+}

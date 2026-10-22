@@ -1,0 +1,19 @@
+<?tyhp
+namespace Toolbox;
+
+class Digests {
+    public function hash(string $algorithm, string $text): string {
+        $known = \hash_algos();
+        bool $supported = false;
+        foreach ($known as $name) {
+            if ($name is string && $name === $algorithm) {
+                $supported = true;
+                break;
+            }
+        }
+        if (!$supported) {
+            throw new \InvalidArgumentException('Unknown hash algorithm: ' . $algorithm);
+        }
+        return \hash($algorithm, $text);
+    }
+}

@@ -1,0 +1,90 @@
+<?tyhp
+namespace Results;
+
+class TicketDesk {
+    public function __construct(private string $path): void {}
+
+    public function all(): MemoryRepository<Ticket> {
+        $file = $this->read();
+        array<int, Ticket> $rows = [];
+        foreach ($file->tickets as $record) {
+            $state = TicketState::tryFrom($record->state);
+            if ($state === null) {
+                $state = TicketState::Open;
+            }
+            $rows[$record->id] = new Ticket($record->id, $record->title, $record->requester, $state);
+        }
+        return new MemoryRepository<Ticket>($rows);
+    }
+
+    public function add(string $title, string $requester): Result<Ticket> {
+        $repo = $this->all();
+        int $nextId = 1;
+        foreach ($repo->rows() as $id => $ticket) {
+            (void)$ticket;
+            if ($id >= $nextId) {
+                $nextId = $id + 1;
+            }
+        }
+        $ticket = new Ticket($nextId, $title, $requester, TicketState::Open);
+        $repo->put($nextId, $ticket);
+        $this->write($repo);
+        return ResultFactory::success<Ticket>($ticket);
+    }
+
+    public function close(int $id): Result<Ticket> {
+        $repo = $this->all();
+        $found = $repo->find($id);
+        if (!$found->isOk()) {
+            return $found;
+        }
+        $ticket = $found->value();
+        if ($ticket === null) {
+            return ResultFactory::failure<Ticket>('Missing ticket.');
+        }
+        $ticket->state = TicketState::Closed;
+        $repo->put($id, $ticket);
+        $this->write($repo);
+        return ResultFactory::success<Ticket>($ticket);
+    }
+
+    public function show(int $id): Result<string> {
+        return $this->all()->find($id)->map<string>(fn(Ticket $ticket): string => $ticket->summary());
+    }
+
+    private function read(): TicketFile {
+        if (!\is_file($this->path)) {
+            return new TicketFile();
+        }
+        $raw = \file_get_contents($this->path);
+        if ($raw === false || $raw->isEmpty()) {
+            return new TicketFile();
+        }
+        TicketFile $file = new TicketFile();
+        if (!$raw->jsonTryDecodeAs<TicketFile>($file)) {
+            return new TicketFile();
+        }
+        return $file;
+    }
+
+    private function write(MemoryRepository<Ticket> $repo): void {
+        array<TicketRecord> $records = [];
+        foreach ($repo->rows() as $ticket) {
+            $records[] = new TicketRecord() with [
+                id => $ticket->id,
+                title => $ticket->title,
+                requester => $ticket->requester,
+                state => $ticket->state->value,
+            ];
+        }
+        $file = new TicketFile() with [tickets => $records];
+        $json = \json_encode($file, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
+        if ($json === false) {
+            throw new \RuntimeException('Could not encode tickets.');
+        }
+        $written = \file_put_contents($this->path, $json . "\n");
+        if ($written === false) {
+            throw new \RuntimeException('Could not write ' . $this->path);
+        }
+    }
+}

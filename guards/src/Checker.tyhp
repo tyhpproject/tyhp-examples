@@ -1,0 +1,18 @@
+<?tyhp
+namespace Guards;
+
+class Checker {
+    public static function isPositiveInt(mixed $value): $value is int {
+        return $value is int && $value > 0;
+    }
+
+    public function check(mixed $value): string {
+        if (self::isPositiveInt($value)) {
+            return 'positive ' . (string)$value;
+        }
+        if ($value is int) {
+            return 'not positive';
+        }
+        return 'not an int';
+    }
+}

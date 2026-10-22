@@ -1,0 +1,14 @@
+<?tyhp
+namespace Expenses;
+
+type ExpenseRecord = struct {
+    int $id = 0;
+    string $payee = '';
+    string $category = 'other';
+    string $amount = '0.00';
+    string $note = '';
+};
+
+type ExpenseFile = struct {
+    array<ExpenseRecord> $expenses = [];
+};

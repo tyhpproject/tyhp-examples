@@ -1,0 +1,25 @@
+<?tyhp
+namespace Results;
+
+enum TicketState: string {
+    case Open = 'open';
+    case Closed = 'closed';
+}
+
+class Ticket {
+    public function __construct(
+        public int $id,
+        public string $title,
+        public string $requester,
+        public TicketState $state,
+    ): void {}
+
+    public function summary(): string {
+        return '%d [%s] %s (%s)'->format(
+            $this->id,
+            $this->state->value,
+            $this->title,
+            $this->requester,
+        );
+    }
+}

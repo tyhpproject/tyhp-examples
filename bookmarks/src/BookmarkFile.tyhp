@@ -1,0 +1,15 @@
+<?tyhp 
+namespace Bookmarks;
+
+type BookmarkRecord = struct {
+    int $id = 0;
+    string $title = '';
+    string $url = '';
+    array<int, string> $tags = [];
+    ?string $note = null;
+    string $savedAt = '';
+};
+
+type BookmarkFile = struct {
+    array<BookmarkRecord> $bookmarks = [];
+};

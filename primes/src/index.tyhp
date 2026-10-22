@@ -1,0 +1,5 @@
+<?tyhp
+namespace Primes;
+
+$cli = new Cli();
+exit($cli->run($argv));

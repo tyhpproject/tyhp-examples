@@ -1,0 +1,99 @@
+<?tyhp
+namespace Convert;
+
+class Cli {
+    public function __construct(
+        private Numbers $numbers,
+        private Lookup $lookup,
+    ): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'double') {
+            return $this->double($args);
+        }
+        if ($command === 'upper') {
+            return $this->upper($args);
+        }
+        if ($command === 'find') {
+            return $this->find($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function double(array<int, string> $args): int {
+        if (!isset($args[2])) {
+            echo "Usage: double <number>\n";
+            return 1;
+        }
+        string $text = $args[2]->trim();
+        if ($text->matches('/^[+-]?\d+$/')) {
+            int $value = $text->__toInt();
+            echo (string)$this->numbers->double($value) . "\n";
+            return 0;
+        }
+        if ($text->matches('/^[+-]?\d+\.\d+$/')) {
+            float $value = \floatval($text);
+            echo (string)$this->numbers->double($value) . "\n";
+            return 0;
+        }
+        echo "Usage: double <number>\n";
+        return 1;
+    }
+
+    private function upper(array<int, string> $args): int {
+        string $text = $this->join($args, 2);
+        if ($text->isEmpty()) {
+            echo "Usage: upper <text>\n";
+            return 1;
+        }
+        echo $this->lookup->upper($text) . "\n";
+        return 0;
+    }
+
+    private function find(array<int, string> $args): int {
+        if (!isset($args[2]) || $args[2]->trim()->isEmpty()) {
+            echo "Usage: find <id-or-email>\n";
+            return 1;
+        }
+        string $text = $args[2]->trim();
+        if ($text->matches('/^[+]?\d+$/')) {
+            echo $this->lookup->find($text->__toInt()) . "\n";
+            return 0;
+        }
+        echo $this->lookup->find($text) . "\n";
+        return 0;
+    }
+
+    private function join(array<int, string> $args, int $start): string {
+        array<int, string> $parts = [];
+        int $count = \count($args);
+        int $i = $start;
+        while ($i < $count) {
+            $part = $args[$i]->trim();
+            if ($part->isNotEmpty()) {
+                $parts[] = $part;
+            }
+            $i++;
+        }
+        return \implode(' ', $parts);
+    }
+
+    private function help(): void {
+        echo "Doubles a number, uppercases text, and looks up an id or email.\n\n";
+        echo "  double <number>      Print the number times two\n";
+        echo "  upper <text>         Print the text in upper case\n";
+        echo "  find <id-or-email>   Print id N or email address\n";
+    }
+}

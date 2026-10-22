@@ -1,0 +1,12 @@
+<?tyhp
+namespace Inventory;
+
+class Integers {
+    public static function parse(string $text): ?int {
+        $trimmed = $text->trim();
+        if (!$trimmed->matches('/^[+-]?\d+$/')) {
+            return null;
+        }
+        return $trimmed->__toInt();
+    }
+}

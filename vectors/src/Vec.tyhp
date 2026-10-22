@@ -1,0 +1,17 @@
+<?tyhp
+namespace Vectors;
+
+class Vec {
+    public function __construct(
+        public int $x,
+        public int $y,
+    ): void {}
+
+    operator +(self $left, self $right): self => new static($left->x + $right->x, $left->y + $right->y);
+    operator *(self $left, int $right): self => new static($left->x * $right, $left->y * $right);
+    operator ==(self $left, self $right): bool => $left->x === $right->x && $left->y === $right->y;
+
+    public function format(): string {
+        return (string)$this->x . ',' . (string)$this->y;
+    }
+}

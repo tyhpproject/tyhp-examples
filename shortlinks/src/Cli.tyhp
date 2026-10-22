@@ -1,0 +1,137 @@
+<?tyhp
+namespace Shortlinks;
+
+class Cli {
+    public function __construct(private LinkStore $store): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'add') {
+            return $this->add($args);
+        }
+        if ($command === 'list') {
+            return $this->list();
+        }
+        if ($command === 'resolve' || $command === 'get') {
+            return $this->resolve($args);
+        }
+        if ($command === 'remove') {
+            return $this->remove($args);
+        }
+        if ($command === 'slug') {
+            return $this->slug($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function add(array<int, string> $args): int {
+        if (!isset($args[2]) || !isset($args[3])) {
+            echo "Usage: add <code-or-title> <url>\n";
+            return 1;
+        }
+        $code = $args[2]->toSlug();
+        $target = $args[3]->trim();
+        if ($code->isEmpty() || $target->isEmpty()) {
+            echo "Code and URL are required.\n";
+            return 1;
+        }
+        if (!$target->contains('://')) {
+            echo "URL must include a scheme, for example https://example.com.\n";
+            return 1;
+        }
+        $link = $this->store->add($code, $target);
+        echo "{$link->code} -> {$link->target}\n";
+        return 0;
+    }
+
+    private function list(): int {
+        $links = $this->store->all();
+        if ($links === []) {
+            echo "No links yet.\n";
+            return 0;
+        }
+        foreach ($links as $link) {
+            echo "{$link->code}\t{$link->target}\n";
+        }
+        return 0;
+    }
+
+    private function resolve(array<int, string> $args): int {
+        if (!isset($args[2])) {
+            echo "Usage: resolve <code>\n";
+            return 1;
+        }
+        $code = $args[2]->toSlug();
+        $link = $this->store->find($code);
+        if ($link === null) {
+            echo "No link for {$code}.\n";
+            return 1;
+        }
+        echo $link->target . "\n";
+        return 0;
+    }
+
+    private function remove(array<int, string> $args): int {
+        if (!isset($args[2])) {
+            echo "Usage: remove <code>\n";
+            return 1;
+        }
+        $code = $args[2]->toSlug();
+        if (!$this->store->remove($code)) {
+            echo "No link for {$code}.\n";
+            return 1;
+        }
+        echo "Removed {$code}.\n";
+        return 0;
+    }
+
+    private function slug(array<int, string> $args): int {
+        if (!isset($args[2])) {
+            echo "Usage: slug <words>\n";
+            return 1;
+        }
+        array<int, string> $parts = [];
+        int $count = \count($args);
+        int $i = 2;
+        while ($i < $count) {
+            $part = $args[$i]->trim();
+            if ($part->isNotEmpty()) {
+                $parts[] = $part;
+            }
+            $i++;
+        }
+        if ($parts === []) {
+            echo "Usage: slug <words>\n";
+            return 1;
+        }
+        $text = \implode(' ', $parts);
+        $code = $text->toSlug();
+        if ($code->isEmpty()) {
+            echo "Could not make a slug.\n";
+            return 1;
+        }
+        echo $code . "\n";
+        return 0;
+    }
+
+    private function help(): void {
+        echo "Local short-link registry (SHORTLINKS_FILE, or shortlinks.json).\n";
+        echo "Nothing is fetched over the network.\n\n";
+        echo "  add <code-or-title> <url>   Save a link. The code is slugified.\n";
+        echo "  list                        Print code and target.\n";
+        echo "  resolve <code>              Print the target URL.\n";
+        echo "  remove <code>               Delete a link.\n";
+        echo "  slug <words>                Print a slug and do not save it.\n";
+    }
+}

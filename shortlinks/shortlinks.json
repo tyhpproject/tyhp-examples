@@ -1,0 +1,9 @@
+{
+    "links": [
+        {
+            "code": "launch-post",
+            "target": "https://example.com/launch",
+            "createdAt": "2026-10-21T20:34:10+00:00"
+        }
+    ]
+}

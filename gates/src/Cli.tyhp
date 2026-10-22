@@ -1,0 +1,67 @@
+<?tyhp
+namespace Gates;
+
+class Cli {
+    public function __construct(private Probe $probe): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'length') {
+            return $this->length($args);
+        }
+        if ($command === 'php') {
+            echo $this->probe->phpLabel() . "\n";
+            return 0;
+        }
+        if ($command === 'first') {
+            return $this->first($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function length(array<int, string> $args): int {
+        if (!isset($args[2])) {
+            echo "Usage: length <text>\n";
+            return 1;
+        }
+        echo $this->probe->length($args[2]) . "\n";
+        return 0;
+    }
+
+    private function first(array<int, string> $args): int {
+        array<int, string> $items = [];
+        int $count = \count($args);
+        int $i = 2;
+        while ($i < $count) {
+            $item = $args[$i]->trim();
+            if ($item->isNotEmpty()) {
+                $items[] = $item;
+            }
+            $i++;
+        }
+        if ($items === []) {
+            echo "Usage: first <item>...\n";
+            return 1;
+        }
+        echo $this->probe->first($items) . "\n";
+        return 0;
+    }
+
+    private function help(): void {
+        echo "Shows which PHP version and string extension this build is using.\n\n";
+        echo "  length <text>    Print mbstring or bytes, then the length\n";
+        echo "  php              Print the PHP 8.5 or 8.6+ label\n";
+        echo "  first <item>...  Print the first item\n";
+    }
+}

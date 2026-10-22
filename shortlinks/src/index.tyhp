@@ -1,0 +1,11 @@
+<?tyhp
+namespace Shortlinks;
+
+$path = \getenv('SHORTLINKS_FILE');
+string $file = 'shortlinks.json';
+if ($path is string && $path->isNotEmpty()) {
+    $file = $path;
+}
+
+$cli = new Cli(new LinkStore($file));
+exit($cli->run($argv));

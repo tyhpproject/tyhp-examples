@@ -1,0 +1,11 @@
+<?tyhp
+namespace Results;
+
+$path = \getenv('TICKETS_FILE');
+string $file = 'tickets.json';
+if ($path is string && $path->isNotEmpty()) {
+    $file = $path;
+}
+
+$cli = new Cli(new TicketDesk($file));
+exit($cli->run($argv));

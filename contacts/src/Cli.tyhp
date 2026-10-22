@@ -1,0 +1,151 @@
+<?tyhp 
+namespace Contacts;
+
+class Cli {
+    public function __construct(private ContactStore $store): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'add') {
+            return $this->add($args);
+        }
+        if ($command === 'list') {
+            return $this->list();
+        }
+        if ($command === 'find') {
+            return $this->find($args);
+        }
+        if ($command === 'remove') {
+            return $this->remove($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function add(array<int, string> $args): int {
+        if (!isset($args[2]) || !isset($args[3])) {
+            echo "Usage: add <name> <email> [phone] [company]\n";
+            return 1;
+        }
+        string $name = $args[2]->trim();
+        string $email = $args[3]->trim();
+        if ($name->isEmpty() || $email->isEmpty()) {
+            echo "Usage: add <name> <email> [phone] [company]\n";
+            return 1;
+        }
+        ?string $phone = $this->optionalArg($args, 4);
+        ?string $company = $this->optionalArg($args, 5);
+        $contact = $this->store->add($name, $email, $phone, $company);
+        echo "Added #{$contact->id}: {$contact->name} <{$contact->email}>\n";
+        return 0;
+    }
+
+    private function list(): int {
+        $contacts = $this->store->all();
+        if ($contacts === []) {
+            echo "No contacts yet.\n";
+            return 0;
+        }
+        foreach ($contacts as $contact) {
+            $this->printContact($contact);
+        }
+        return 0;
+    }
+
+    private function find(array<int, string> $args): int {
+        if (!isset($args[2])) {
+            echo "Usage: find <text>\n";
+            return 1;
+        }
+        array<int, string> $parts = [];
+        int $count = \count($args);
+        int $i = 2;
+        while ($i < $count) {
+            $part = $args[$i]->trim();
+            if ($part->isNotEmpty()) {
+                $parts[] = $part;
+            }
+            $i++;
+        }
+        if ($parts === []) {
+            echo "Usage: find <text>\n";
+            return 1;
+        }
+        string $query = \implode(' ', $parts);
+        $contacts = $this->store->all();
+        int $shown = 0;
+        foreach ($contacts as $contact) {
+            if (!$contact->matches($query)) {
+                continue;
+            }
+            $this->printContact($contact);
+            $shown++;
+        }
+        if ($shown === 0) {
+            echo "No contacts match.\n";
+        }
+        return 0;
+    }
+
+    private function remove(array<int, string> $args): int {
+        $id = $this->requireId($args);
+        if ($id === null) {
+            return 1;
+        }
+        if (!$this->store->remove($id)) {
+            echo "No contact #{$id}.\n";
+            return 1;
+        }
+        echo "Removed #{$id}.\n";
+        return 0;
+    }
+
+    private function requireId(array<int, string> $args): ?int {
+        if (!isset($args[2]) || !$args[2]->isNumeric()) {
+            echo "Usage: remove <id>\n";
+            return null;
+        }
+        return $args[2]->__toInt();
+    }
+
+    private function optionalArg(array<int, string> $args, int $index): ?string {
+        if (!isset($args[$index])) {
+            return null;
+        }
+        string $value = $args[$index]->trim();
+        if ($value->isEmpty()) {
+            return null;
+        }
+        return $value;
+    }
+
+    private function printContact(Contact $contact): void {
+        string $phone = '';
+        if ($contact->phone !== null) {
+            $phone = $contact->phone;
+        }
+        string $company = '';
+        if ($contact->company !== null) {
+            $company = $contact->company;
+        }
+        echo "{$contact->id}\t{$contact->name}\t{$contact->email}\t{$phone}\t{$company}\n";
+    }
+
+    private function help(): void {
+        echo "Contact directory stored in a JSON file (CONTACTS_FILE, or contacts.json).\n\n";
+        echo "  add <name> <email> [phone] [company]   Add a person\n";
+        echo "  list                                   List contacts\n";
+        echo "  find <text>                            Find by name or email\n";
+        echo "  remove <id>                            Delete a contact\n";
+    }
+}

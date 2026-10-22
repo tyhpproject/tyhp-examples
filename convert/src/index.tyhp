@@ -1,0 +1,5 @@
+<?tyhp
+namespace Convert;
+
+$cli = new Cli(new Numbers(), new Lookup());
+exit($cli->run($argv));

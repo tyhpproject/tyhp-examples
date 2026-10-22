@@ -1,0 +1,16 @@
+{
+    "tickets": [
+        {
+            "id": 1,
+            "title": "Printer jam",
+            "requester": "ada",
+            "state": "closed"
+        },
+        {
+            "id": 2,
+            "title": "Printer jam",
+            "requester": "ada",
+            "state": "open"
+        }
+    ]
+}

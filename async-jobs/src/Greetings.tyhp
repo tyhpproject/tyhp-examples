@@ -1,0 +1,19 @@
+<?tyhp
+namespace AsyncJobs;
+
+use Tyhp\Promise;
+
+class Greetings {
+    public async function greet(string $name): string {
+        await Promise::delay(15);
+        return $name;
+    }
+
+    public async function all(array<int, string> $names): array<string> {
+        array<Promise<string>> $pending = [];
+        foreach ($names as string $name) {
+            $pending[] = $this->greet($name);
+        }
+        return await Promise::all($pending);
+    }
+}

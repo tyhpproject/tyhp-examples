@@ -1,0 +1,5 @@
+<?tyhp
+namespace Codes;
+
+$cli = new Cli(new CodeBook());
+exit($cli->run($argv));

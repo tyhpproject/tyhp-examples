@@ -1,0 +1,13 @@
+<?tyhp
+namespace Inventory;
+
+type ItemRecord = struct {
+    string $sku = '';
+    string $name = '';
+    int $quantity = 0;
+    string $location = '';
+};
+
+type ItemFile = struct {
+    array<ItemRecord> $items = [];
+};

@@ -1,0 +1,12 @@
+<?tyhp
+namespace Shortlinks;
+
+type LinkRecord = struct {
+    string $code = '';
+    string $target = '';
+    string $createdAt = '';
+};
+
+type LinkFile = struct {
+    array<LinkRecord> $links = [];
+};

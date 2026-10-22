@@ -1,0 +1,5 @@
+<?tyhp
+namespace Filters;
+
+$cli = new Cli(new Roster());
+exit($cli->run($argv));

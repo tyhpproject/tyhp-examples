@@ -1,0 +1,91 @@
+<?tyhp
+namespace Vectors;
+
+class Cli {
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'add') {
+            return $this->add($args);
+        }
+        if ($command === 'scale') {
+            return $this->scale($args);
+        }
+        if ($command === 'eq') {
+            return $this->eq($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function add(array<int, string> $args): int {
+        ?Vec $left = $this->vecAt($args, 2);
+        ?Vec $right = $this->vecAt($args, 4);
+        if ($left === null || $right === null) {
+            echo "Usage: add <x1> <y1> <x2> <y2>\n";
+            return 1;
+        }
+        Vec $sum = $left + $right;
+        echo $sum->format() . "\n";
+        return 0;
+    }
+
+    private function scale(array<int, string> $args): int {
+        ?Vec $vec = $this->vecAt($args, 2);
+        ?int $factor = $this->intAt($args, 4);
+        if ($vec === null || $factor === null) {
+            echo "Usage: scale <x> <y> <factor>\n";
+            return 1;
+        }
+        Vec $scaled = $vec * $factor;
+        echo $scaled->format() . "\n";
+        return 0;
+    }
+
+    private function eq(array<int, string> $args): int {
+        ?Vec $left = $this->vecAt($args, 2);
+        ?Vec $right = $this->vecAt($args, 4);
+        if ($left === null || $right === null) {
+            echo "Usage: eq <x1> <y1> <x2> <y2>\n";
+            return 1;
+        }
+        echo ($left == $right) ? "yes\n" : "no\n";
+        return 0;
+    }
+
+    private function vecAt(array<int, string> $args, int $index): ?Vec {
+        ?int $x = $this->intAt($args, $index);
+        ?int $y = $this->intAt($args, $index + 1);
+        if ($x === null || $y === null) {
+            return null;
+        }
+        return new Vec($x, $y);
+    }
+
+    private function intAt(array<int, string> $args, int $index): ?int {
+        if (!isset($args[$index])) {
+            return null;
+        }
+        $text = $args[$index]->trim();
+        if (!$text->matches('/^[+-]?\d+$/')) {
+            return null;
+        }
+        return $text->__toInt();
+    }
+
+    private function help(): void {
+        echo "Adds, scales, and compares 2D vectors with operator overloads.\n\n";
+        echo "  add <x1> <y1> <x2> <y2>   Print x1+x2,y1+y2\n";
+        echo "  scale <x> <y> <factor>    Print x*factor,y*factor\n";
+        echo "  eq <x1> <y1> <x2> <y2>    Print yes or no\n";
+    }
+}

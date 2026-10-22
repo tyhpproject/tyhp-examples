@@ -1,0 +1,16 @@
+<?tyhp
+namespace Expenses;
+
+class Money {
+    public static function parse(string $raw): ?decimal {
+        string $text = $raw->trim();
+        if (\preg_match('/^\d+(\.\d+)?$/', $text) !== 1) {
+            return null;
+        }
+        decimal $amount = \Tyhp\decimal($text);
+        if ($amount <= 0) {
+            return null;
+        }
+        return $amount;
+    }
+}

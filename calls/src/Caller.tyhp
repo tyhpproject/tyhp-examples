@@ -1,0 +1,13 @@
+<?tyhp
+namespace Calls;
+
+class Caller {
+    public function apply<TCallable extends callable>(
+        TCallable $cb,
+        __CallableParametersStruct<TCallable> $args,
+    ): __CallableReturnType<TCallable> {
+        return \call_user_func_array($cb, $args);
+    }
+
+    public fn shout(string $text): string => $text->toUpper();
+}

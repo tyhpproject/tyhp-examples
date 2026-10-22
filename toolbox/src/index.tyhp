@@ -1,0 +1,5 @@
+<?tyhp
+namespace Toolbox;
+
+$cli = new Cli(new Digests(), new Clock());
+exit($cli->run($argv));

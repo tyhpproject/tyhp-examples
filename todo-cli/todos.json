@@ -1,0 +1,10 @@
+{
+    "tasks": [
+        {
+            "id": 1,
+            "title": "Buy milk",
+            "status": "open",
+            "createdAt": "2026-10-21T20:34:10+00:00"
+        }
+    ]
+}

@@ -1,0 +1,80 @@
+<?tyhp
+namespace Inventory;
+
+class CsvImporter {
+    public array<int, string> $errors = [];
+
+    public function read(string $path): array<Item> {
+        $this->errors = [];
+        if (!\is_file($path)) {
+            throw new \InvalidArgumentException('No CSV file at ' . $path);
+        }
+        $lines = \file($path, \FILE_IGNORE_NEW_LINES);
+        if (!\is_array($lines)) {
+            throw new \RuntimeException('Could not read ' . $path);
+        }
+
+        array<Item> $items = [];
+        bool $headerChecked = false;
+        int $row = 0;
+        foreach ($lines as $line) {
+            $row++;
+            $text = $line->trim();
+            if ($text->isEmpty()) {
+                continue;
+            }
+            $cells = \str_getcsv($text, ',', '"', '');
+            array<int, string> $fields = [];
+            foreach ($cells as $cell) {
+                mixed $value = $cell;
+                if (\is_string($value)) {
+                    $fields[] = $value->trim();
+                } else {
+                    $fields[] = '';
+                }
+            }
+            if (!$headerChecked) {
+                $headerChecked = true;
+                if ($this->isHeader($fields)) {
+                    continue;
+                }
+            }
+            $item = $this->parseFields($fields, $row);
+            if ($item !== null) {
+                $items[] = $item;
+            }
+        }
+        return $items;
+    }
+
+    private function isHeader(array<int, string> $fields): bool {
+        if (\count($fields) !== 4) {
+            return false;
+        }
+        return $fields[0]->toLower() === 'sku'
+            && $fields[1]->toLower() === 'name'
+            && $fields[2]->toLower() === 'quantity'
+            && $fields[3]->toLower() === 'location';
+    }
+
+    private function parseFields(array<int, string> $fields, int $row): ?Item {
+        if (\count($fields) !== 4) {
+            $this->errors[] = "line {$row}: expected sku, name, quantity, location";
+            return null;
+        }
+        if ($fields[0]->isEmpty()) {
+            $this->errors[] = "line {$row}: sku is empty";
+            return null;
+        }
+        if ($fields[1]->isEmpty()) {
+            $this->errors[] = "line {$row}: name is empty";
+            return null;
+        }
+        $quantity = Integers::parse($fields[2]);
+        if ($quantity === null) {
+            $this->errors[] = "line {$row}: quantity is not an integer";
+            return null;
+        }
+        return new Item($fields[0], $fields[1], $quantity, $fields[3]);
+    }
+}

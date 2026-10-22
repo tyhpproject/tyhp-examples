@@ -1,0 +1,25 @@
+<?tyhp
+namespace Filters;
+
+use Tyhp\Expression;
+use Tyhp\Expression\BinaryExpression;
+use Tyhp\Expression\PropertyAccessExpression;
+use Tyhp\PropertyPath;
+
+class Roster {
+    public function summary(Expression<callable(Person): bool> $predicate): string {
+        $body = $predicate->body;
+        if (!($body is BinaryExpression)) {
+            return $body->nodeType;
+        }
+        $left = $body->left;
+        if (!($left is PropertyAccessExpression)) {
+            return $body->operator;
+        }
+        return $left->property . ' ' . $body->operator;
+    }
+
+    public function column<R>(PropertyPath<callable(Person): R> $path): string {
+        return $path->getPath();
+    }
+}

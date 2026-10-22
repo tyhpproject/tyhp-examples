@@ -1,0 +1,56 @@
+<?tyhp
+namespace Queues;
+
+class Cli {
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'push') {
+            return $this->push($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function push(array<int, string> $args): int {
+        array<int, string> $items = [];
+        int $count = \count($args);
+        int $i = 2;
+        while ($i < $count) {
+            $item = $args[$i]->trim();
+            if ($item->isNotEmpty()) {
+                $items[] = $item;
+            }
+            $i++;
+        }
+        if ($items === []) {
+            echo "Usage: push <item>...\n";
+            return 1;
+        }
+
+        \SplQueue<string> $queue = new \SplQueue<string>();
+        foreach ($items as string $item) {
+            $queue->enqueue($item);
+        }
+        echo (string)$queue->count() . "\n";
+        while ($queue->count() > 0) {
+            string $next = $queue->dequeue();
+            echo $next . "\n";
+        }
+        return 0;
+    }
+
+    private function help(): void {
+        echo "Pushes strings onto a generic SplQueue and prints them in order.\n\n";
+        echo "  push <item>...   Print the count, then each item\n";
+    }
+}

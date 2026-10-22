@@ -1,0 +1,13 @@
+<?tyhp
+namespace Todo;
+
+type TaskRecord = struct {
+    int $id = 0;
+    string $title = '';
+    string $status = 'open';
+    string $createdAt = '';
+};
+
+type TaskFile = struct {
+    array<TaskRecord> $tasks = [];
+};

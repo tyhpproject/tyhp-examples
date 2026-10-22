@@ -1,0 +1,15 @@
+<?tyhp
+namespace Todo;
+
+class Task {
+    public function __construct(
+        public int $id,
+        public string $title,
+        public TaskStatus $status,
+        public string $createdAt,
+    ): void {}
+
+    public function isDone(): bool {
+        return $this->status === TaskStatus::Done;
+    }
+}

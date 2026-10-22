@@ -1,0 +1,9 @@
+<?tyhp
+namespace Expenses;
+
+enum Category: string {
+    case Food = 'food';
+    case Travel = 'travel';
+    case Supplies = 'supplies';
+    case Other = 'other';
+}

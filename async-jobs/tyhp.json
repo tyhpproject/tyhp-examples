@@ -1,0 +1,27 @@
+{
+  "include": [
+    "src/**/*.tyhp"
+  ],
+  "exclude": [
+    "vendor/**",
+    "node_modules/**"
+  ],
+  "tyhpdefInclude": [
+    "./vendor-tyhpdef/**/*.tyhpdef"
+  ],
+  "overlay": [
+    "./tyhpdef/**/*.tyhpdef"
+  ],
+  "source": {
+    "tagless": false
+  },
+  "output": {
+    "path": "build/",
+    "phpVersion": "8.5",
+    "strictTypes": true,
+    "comments": true
+  },
+  "psr4": {
+    "AsyncJobs\\": "src/"
+  }
+}

@@ -1,0 +1,5 @@
+<?tyhp
+namespace Symbols;
+
+$cli = new Cli(new Report());
+exit($cli->run($argv));

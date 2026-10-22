@@ -1,0 +1,155 @@
+<?tyhp
+namespace Recipes;
+
+class Cli {
+    public function __construct(
+        private RecipeBox $box,
+        private Scaler $scaler,
+    ): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'add') {
+            return $this->add($args);
+        }
+        if ($command === 'ingredient') {
+            return $this->ingredient($args);
+        }
+        if ($command === 'list') {
+            return $this->list();
+        }
+        if ($command === 'show') {
+            return $this->show($args, false);
+        }
+        if ($command === 'scale') {
+            return $this->show($args, true);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function add(array<int, string> $args): int {
+        if (!isset($args[2]) || !isset($args[3]) || !$args[2]->isNumeric()) {
+            echo "Usage: add <servings> <course> <title>\n";
+            return 1;
+        }
+        $course = Course::tryFrom($args[3]->toLower());
+        if ($course === null) {
+            echo "Course must be breakfast, lunch, dinner, or snack.\n";
+            return 1;
+        }
+        $title = $this->join($args, 4);
+        if ($title->isEmpty()) {
+            echo "Usage: add <servings> <course> <title>\n";
+            return 1;
+        }
+        int $servings = $args[2]->__toInt();
+        if ($servings < 1) {
+            echo "Servings must be at least 1.\n";
+            return 1;
+        }
+        $recipe = $this->box->add($title, $servings, $course);
+        echo "Added #{$recipe->id}: {$recipe->title}\n";
+        return 0;
+    }
+
+    private function ingredient(array<int, string> $args): int {
+        if (!isset($args[2]) || !isset($args[3]) || !isset($args[4]) || !$args[2]->isNumeric()) {
+            echo "Usage: ingredient <id> <quantity> <unit> <name>\n";
+            return 1;
+        }
+        $name = $this->join($args, 5);
+        if ($name->isEmpty() || !$args[3]->isNumeric()) {
+            echo "Usage: ingredient <id> <quantity> <unit> <name>\n";
+            return 1;
+        }
+        Ingredient $ingredient = new Ingredient($args[3]->trim(), $args[4]->trim(), $name);
+        $recipe = $this->box->addIngredient($args[2]->__toInt(), $ingredient);
+        if ($recipe === null) {
+            echo "No recipe #{$args[2]}.\n";
+            return 1;
+        }
+        echo 'Added ' . $ingredient->quantity . ' ' . $ingredient->unit . ' ' . $ingredient->name . " to #{$recipe->id}.\n";
+        return 0;
+    }
+
+    private function list(): int {
+        $recipes = $this->box->all();
+        if ($recipes === []) {
+            echo "No recipes yet.\n";
+            return 0;
+        }
+        foreach ($recipes as $recipe) {
+            echo "{$recipe->id}\t{$recipe->course->value}\t{$recipe->servings}\t{$recipe->title}\n";
+        }
+        return 0;
+    }
+
+    private function show(array<int, string> $args, bool $scaled): int {
+        if (!isset($args[2]) || !$args[2]->isNumeric()) {
+            echo $scaled ? "Usage: scale <id> <servings>\n" : "Usage: show <id>\n";
+            return 1;
+        }
+        $recipe = $this->box->find($args[2]->__toInt());
+        if ($recipe === null) {
+            echo "No recipe #{$args[2]}.\n";
+            return 1;
+        }
+        int $servings = $recipe->servings;
+        if ($scaled) {
+            if (!isset($args[3]) || !$args[3]->isNumeric()) {
+                echo "Usage: scale <id> <servings>\n";
+                return 1;
+            }
+            $servings = $args[3]->__toInt();
+            if ($servings < 1) {
+                echo "Servings must be at least 1.\n";
+                return 1;
+            }
+        }
+        echo "{$recipe->title} ({$recipe->course->value}, {$servings} servings)\n";
+        $lines = $scaled ? $this->scaler->scale($recipe, $servings) : $recipe->ingredients;
+        if ($lines === []) {
+            echo "  (no ingredients)\n";
+            return 0;
+        }
+        foreach ($lines as $line) {
+            echo "  {$line->quantity} {$line->unit} {$line->name}\n";
+        }
+        return 0;
+    }
+
+    private function join(array<int, string> $args, int $start): string {
+        array<int, string> $parts = [];
+        int $count = \count($args);
+        int $i = $start;
+        while ($i < $count) {
+            $part = $args[$i]->trim();
+            if ($part->isNotEmpty()) {
+                $parts[] = $part;
+            }
+            $i++;
+        }
+        return \implode(' ', $parts);
+    }
+
+    private function help(): void {
+        echo "Recipe box (RECIPES_FILE, or recipes.json).\n";
+        echo "scale prints quantities for a different serving count and does not save them.\n\n";
+        echo "  add <servings> <course> <title>\n";
+        echo "  ingredient <id> <quantity> <unit> <name>\n";
+        echo "  list\n";
+        echo "  show <id>\n";
+        echo "  scale <id> <servings>\n";
+    }
+}

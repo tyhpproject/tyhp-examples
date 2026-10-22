@@ -1,0 +1,49 @@
+<?tyhp
+namespace Clocks;
+
+class Cli {
+    public function __construct(private Format $format): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'fixed') {
+            return $this->fixed($args);
+        }
+        if ($command === 'other') {
+            echo $this->format->describe(new Marker()) . "\n";
+            return 0;
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function fixed(array<int, string> $args): int {
+        if (!isset($args[2]) || $args[2]->trim()->isEmpty()) {
+            echo "Usage: fixed <iso-8601>\n";
+            return 1;
+        }
+        try {
+            echo $this->format->describe(new FixedClock($args[2]->trim())) . "\n";
+        } catch (\Throwable $e) {
+            echo $e->getMessage() . "\n";
+            return 1;
+        }
+        return 0;
+    }
+
+    private function help(): void {
+        echo "Formats a value when it matches ClockShape.\n\n";
+        echo "  fixed <iso-8601>   Print that instant\n";
+        echo "  other              Print not a clock\n";
+    }
+}

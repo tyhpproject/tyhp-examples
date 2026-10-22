@@ -1,0 +1,5 @@
+<?tyhp
+namespace Calls;
+
+$cli = new Cli(new Caller());
+exit($cli->run($argv));

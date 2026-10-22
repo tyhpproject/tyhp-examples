@@ -1,0 +1,16 @@
+<?tyhp
+namespace ConfigTool;
+
+class EnvFile {
+    public function __construct(private string $path): void {}
+
+    public function load(): array<string, string|null> {
+        $directory = \dirname($this->path);
+        $name = \basename($this->path);
+        if ($name->isEmpty()) {
+            return [];
+        }
+        $dotenv = \Dotenv\Dotenv::createImmutable($directory, $name);
+        return $dotenv->safeLoad();
+    }
+}

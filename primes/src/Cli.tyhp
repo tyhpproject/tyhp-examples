@@ -1,0 +1,85 @@
+<?tyhp
+namespace Primes;
+
+use Tyhp\EventLoop;
+use Tyhp\Parallel;
+
+class Cli {
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'count') {
+            return $this->count($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function count(array<int, string> $args): int {
+        if (!isset($args[2])) {
+            echo "Usage: count <limit>\n";
+            return 1;
+        }
+        ?int $limit = $this->parseInt($args[2]);
+        if ($limit === null || $limit < 0) {
+            echo "Usage: count <limit>\n";
+            return 1;
+        }
+        if ($limit < 2) {
+            echo "0\n";
+            return 0;
+        }
+
+        Parallel::start(2);
+        try {
+            int $total = EventLoop::getInstance()->run($this->countChunks($limit));
+            echo (string)$total . "\n";
+            return 0;
+        } catch (\Throwable $e) {
+            echo $e->getMessage() . "\n";
+            return 1;
+        } finally {
+            Parallel::shutdown();
+        }
+    }
+
+    private async function countChunks(int $limit): int {
+        int $chunks = 2;
+        int $chunkSize = \intdiv($limit, $chunks);
+        array<int, int> $counts = await Parallel::forAsync(
+            0,
+            $chunks,
+            fn(int $i): CountPrimesTask => new CountPrimesTask(
+                $i * $chunkSize,
+                $i === $chunks - 1 ? $limit : ($i + 1) * $chunkSize,
+            ),
+        );
+        int $sum = 0;
+        foreach ($counts as int $count) {
+            $sum += $count;
+        }
+        return $sum;
+    }
+
+    private function parseInt(string $text): ?int {
+        $trimmed = $text->trim();
+        if (!$trimmed->matches('/^[+]?\d+$/')) {
+            return null;
+        }
+        return $trimmed->__toInt();
+    }
+
+    private function help(): void {
+        echo "Counts primes below a limit. Each chunk runs in a tyhp/parallel worker.\n\n";
+        echo "  count <limit>   Print how many primes are in [0, limit)\n";
+    }
+}

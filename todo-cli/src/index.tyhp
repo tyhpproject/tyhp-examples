@@ -1,0 +1,11 @@
+<?tyhp
+namespace Todo;
+
+$path = \getenv('TODO_FILE');
+string $file = 'todos.json';
+if ($path is string && $path->isNotEmpty()) {
+    $file = $path;
+}
+
+$cli = new Cli(new TaskStore($file));
+exit($cli->run($argv));

@@ -1,0 +1,15 @@
+<?tyhp
+namespace Shortlinks;
+
+extension SlugText extends string {
+    function toSlug(): string {
+        $lower = $this->toLower()->trim();
+        $dashed = $lower->regexReplace('/[^a-z0-9]+/', '-');
+        if ($dashed === null) {
+            return '';
+        }
+        return $dashed->trim('-');
+    }
+}
+
+global use extension SlugText;

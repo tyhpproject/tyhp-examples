@@ -1,0 +1,226 @@
+<?tyhp 
+namespace Bookmarks;
+
+class Cli {
+    public function __construct(private BookmarkStore $store): void {}
+
+    public function run(array<int, string> $args): int {
+        string $name = 'help';
+        if (isset($args[1]) && !$args[1]->isEmpty()) {
+            $name = $args[1]->toLower();
+        }
+        if ($name === 'help' || $name === '--help' || $name === '-h') {
+            $this->help();
+            return 0;
+        }
+
+        $command = Command::tryFrom($name);
+        if ($command === null) {
+            echo "Unknown command: {$name}\n\n";
+            $this->help();
+            return 1;
+        }
+        if ($command === Command::Add) {
+            return $this->add($args);
+        }
+        if ($command === Command::List) {
+            return $this->list();
+        }
+        if ($command === Command::Search) {
+            return $this->search($args);
+        }
+        if ($command === Command::Remove) {
+            return $this->remove($args);
+        }
+
+        $this->help();
+        return 1;
+    }
+
+    private function add(array<int, string> $args): int {
+        if (!isset($args[2]) || !isset($args[3]) || !isset($args[4])) {
+            echo "Usage: add <title> <url> <tags> [note]\n";
+            return 1;
+        }
+        $title = $args[2]->trim();
+        if ($title->isEmpty()) {
+            echo "Title must not be empty.\n";
+            return 1;
+        }
+        $url = $args[3]->trim();
+        if ($url->isEmpty() || !$url->contains('://')) {
+            echo "URL must include a scheme, such as https://example.com.\n";
+            return 1;
+        }
+        $tags = $this->parseTags($args[4]);
+        if ($tags === []) {
+            echo "Provide at least one tag, separated by commas.\n";
+            return 1;
+        }
+        ?string $note = $this->optionalNote($args);
+        $bookmark = $this->store->add($title, $url, $tags, $note);
+        echo "Added #{$bookmark->id}: {$bookmark->title}\n";
+        return 0;
+    }
+
+    private function list(): int {
+        $bookmarks = $this->store->all();
+        if ($bookmarks === []) {
+            echo "No bookmarks yet.\n";
+            return 0;
+        }
+        foreach ($bookmarks as $bookmark) {
+            $this->printBookmark($bookmark);
+        }
+        return 0;
+    }
+
+    private function search(array<int, string> $args): int {
+        SearchScope $scope = 'any';
+        int $start = 2;
+        if (isset($args[2])) {
+            $flag = $args[2]->toLower();
+            if ($flag === '--title' || $flag === '--url' || $flag === '--tag' || $flag === '--note') {
+                $scope = $this->scopeFromFlag($flag);
+                $start = 3;
+            }
+        }
+        $query = $this->joinArgs($args, $start);
+        if ($query === null) {
+            echo "Usage: search [--title|--url|--tag|--note] <query>\n";
+            return 1;
+        }
+        $needle = $query->toLower();
+        int $shown = 0;
+        foreach ($this->store->all() as $bookmark) {
+            if (!$this->matches($bookmark, $needle, $scope)) {
+                continue;
+            }
+            $this->printBookmark($bookmark);
+            $shown++;
+        }
+        if ($shown === 0) {
+            echo "No bookmarks match.\n";
+        }
+        return 0;
+    }
+
+    private function remove(array<int, string> $args): int {
+        $id = $this->requireId($args);
+        if ($id === null) {
+            return 1;
+        }
+        if (!$this->store->remove($id)) {
+            echo "No bookmark #{$id}.\n";
+            return 1;
+        }
+        echo "Removed #{$id}.\n";
+        return 0;
+    }
+
+    private function matches(Bookmark $bookmark, string $needle, SearchScope $scope): bool {
+        if (($scope === 'any' || $scope === 'title') && $bookmark->title->toLower()->contains($needle)) {
+            return true;
+        }
+        if (($scope === 'any' || $scope === 'url') && $bookmark->url->toLower()->contains($needle)) {
+            return true;
+        }
+        if ($scope === 'any' || $scope === 'tag') {
+            foreach ($bookmark->tags as $tag) {
+                if ($tag->contains($needle)) {
+                    return true;
+                }
+            }
+        }
+        if ($scope === 'any' || $scope === 'note') {
+            if ($bookmark->note !== null && $bookmark->note->toLower()->contains($needle)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function scopeFromFlag(string $flag): SearchScope {
+        if ($flag === '--title') {
+            return 'title';
+        }
+        if ($flag === '--url') {
+            return 'url';
+        }
+        if ($flag === '--tag') {
+            return 'tag';
+        }
+        return 'note';
+    }
+
+    private function parseTags(string $raw): array<int, string> {
+        array<int, string> $tags = [];
+        foreach ($raw->split(',') as $piece) {
+            $tag = $piece->trim()->toLower();
+            if ($tag->isEmpty()) {
+                continue;
+            }
+            bool $seen = false;
+            foreach ($tags as $existing) {
+                if ($existing === $tag) {
+                    $seen = true;
+                    break;
+                }
+            }
+            if (!$seen) {
+                $tags[] = $tag;
+            }
+        }
+        return $tags;
+    }
+
+    private function optionalNote(array<int, string> $args): ?string {
+        return $this->joinArgs($args, 5);
+    }
+
+    private function joinArgs(array<int, string> $args, int $start): ?string {
+        array<int, string> $parts = [];
+        int $count = \count($args);
+        int $i = $start;
+        while ($i < $count) {
+            $part = $args[$i]->trim();
+            if (!$part->isEmpty()) {
+                $parts[] = $part;
+            }
+            $i++;
+        }
+        if ($parts === []) {
+            return null;
+        }
+        return \implode(' ', $parts);
+    }
+
+    private function printBookmark(Bookmark $bookmark): void {
+        string $tags = \implode(',', $bookmark->tags);
+        string $note = '';
+        if ($bookmark->note !== null) {
+            $note = $bookmark->note;
+        }
+        echo "{$bookmark->id}\t{$bookmark->title}\t{$bookmark->url}\t{$tags}\t{$note}\n";
+    }
+
+    private function requireId(array<int, string> $args): ?int {
+        if (!isset($args[2]) || !$args[2]->isNumeric()) {
+            echo "Usage: remove <id>\n";
+            return null;
+        }
+        return $args[2]->__toInt();
+    }
+
+    private function help(): void {
+        echo "Bookmarks stored in a JSON file (BOOKMARKS_FILE, or bookmarks.json).\n\n";
+        echo "  add <title> <url> <tags> [note]\n";
+        echo "      Save a bookmark. Tags are comma-separated. Quote a title that contains spaces.\n";
+        echo "  list\n";
+        echo "      Print id, title, URL, tags, and note.\n";
+        echo "  search [--title|--url|--tag|--note] <query>\n";
+        echo "      Find bookmarks whose chosen field contains the query.\n";
+        echo "  remove <id>\n";
+        echo "      Delete a bookmark.\n";
+    }
+}

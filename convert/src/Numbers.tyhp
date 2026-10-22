@@ -1,0 +1,21 @@
+<?tyhp
+namespace Convert;
+
+class Numbers {
+    public function double(int $value): int;
+    public function double(float $value): float;
+    public fn double(int|float $value): int|float => $value * 2;
+}
+
+class Lookup {
+    public fn upper(string $value): string => $value->toUpper();
+
+    public function find(int $id): string;
+    public function find(string $email): string;
+    public function find(int|string $key): string {
+        if ($key is int) {
+            return 'id ' . (string)$key;
+        }
+        return 'email ' . $key;
+    }
+}

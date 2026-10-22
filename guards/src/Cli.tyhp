@@ -1,0 +1,44 @@
+<?tyhp
+namespace Guards;
+
+class Cli {
+    public function __construct(private Checker $checker): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'check') {
+            return $this->check($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function check(array<int, string> $args): int {
+        if (!isset($args[2]) || $args[2]->trim()->isEmpty()) {
+            echo "Usage: check <value>\n";
+            return 1;
+        }
+        string $text = $args[2]->trim();
+        if ($text->matches('/^[+-]?\d+$/')) {
+            echo $this->checker->check($text->__toInt()) . "\n";
+            return 0;
+        }
+        echo $this->checker->check($text) . "\n";
+        return 0;
+    }
+
+    private function help(): void {
+        echo "Checks a value with a type guard that narrows to a positive int.\n\n";
+        echo "  check <value>   Print positive N, not positive, or not an int\n";
+    }
+}

@@ -1,0 +1,91 @@
+<?tyhp 
+namespace Bookmarks;
+
+class BookmarkStore {
+    public function __construct(private string $path): void {}
+
+    public function all(): array<Bookmark> {
+        $file = $this->read();
+        array<Bookmark> $bookmarks = [];
+        foreach ($file->bookmarks as $record) {
+            $bookmarks[] = new Bookmark(
+                $record->id,
+                $record->title,
+                $record->url,
+                $record->tags,
+                $record->note,
+                $record->savedAt,
+            );
+        }
+        return $bookmarks;
+    }
+
+    public function add(string $title, string $url, array<int, string> $tags, ?string $note): Bookmark {
+        $bookmarks = $this->all();
+        int $nextId = 1;
+        foreach ($bookmarks as $bookmark) {
+            if ($bookmark->id >= $nextId) {
+                $nextId = $bookmark->id + 1;
+            }
+        }
+        $created = new Bookmark($nextId, $title, $url, $tags, $note, \gmdate('c'));
+        $bookmarks[] = $created;
+        $this->write($bookmarks);
+        return $created;
+    }
+
+    public function remove(int $id): bool {
+        $bookmarks = $this->all();
+        array<Bookmark> $kept = [];
+        bool $found = false;
+        foreach ($bookmarks as $bookmark) {
+            if ($bookmark->id === $id) {
+                $found = true;
+                continue;
+            }
+            $kept[] = $bookmark;
+        }
+        if ($found) {
+            $this->write($kept);
+        }
+        return $found;
+    }
+
+    private function read(): BookmarkFile {
+        if (!\is_file($this->path)) {
+            return new BookmarkFile();
+        }
+        $raw = \file_get_contents($this->path);
+        if ($raw === false || $raw->isEmpty()) {
+            return new BookmarkFile();
+        }
+        BookmarkFile $file = new BookmarkFile();
+        if (!$raw->jsonTryDecodeAs<BookmarkFile>($file)) {
+            throw new \RuntimeException('Could not read bookmarks from ' . $this->path);
+        }
+        return $file;
+    }
+
+    private function write(array<Bookmark> $bookmarks): void {
+        array<BookmarkRecord> $records = [];
+        foreach ($bookmarks as $bookmark) {
+            $records[] = new BookmarkRecord() with [
+                id => $bookmark->id,
+                title => $bookmark->title,
+                url => $bookmark->url,
+                tags => $bookmark->tags,
+                note => $bookmark->note,
+                savedAt => $bookmark->savedAt,
+            ];
+        }
+        $file = new BookmarkFile() with [bookmarks => $records];
+        $json = \json_encode($file, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
+        if ($json === false) {
+            throw new \RuntimeException('Could not encode bookmarks.');
+        }
+        $written = \file_put_contents($this->path, $json . "\n");
+        if ($written === false) {
+            throw new \RuntimeException('Could not write ' . $this->path);
+        }
+    }
+}

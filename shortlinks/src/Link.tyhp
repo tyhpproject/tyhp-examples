@@ -1,0 +1,10 @@
+<?tyhp
+namespace Shortlinks;
+
+class Link {
+    public function __construct(
+        public string $code,
+        public string $target,
+        public string $createdAt,
+    ): void {}
+}

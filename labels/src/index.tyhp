@@ -1,0 +1,5 @@
+<?tyhp
+namespace Labels;
+
+$cli = new Cli();
+exit($cli->run($argv));

@@ -1,0 +1,54 @@
+<?tyhp
+namespace Codes;
+
+class Cli {
+    public function __construct(private CodeBook $book): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'encode') {
+            return $this->encode($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function encode(array<int, string> $args): int {
+        string $text = $this->join($args, 2);
+        if ($text->isEmpty()) {
+            echo "Usage: encode <text>\n";
+            return 1;
+        }
+        echo $this->book->encode($text) . "\n";
+        return 0;
+    }
+
+    private function join(array<int, string> $args, int $start): string {
+        array<int, string> $parts = [];
+        int $count = \count($args);
+        int $i = $start;
+        while ($i < $count) {
+            $part = $args[$i]->trim();
+            if ($part->isNotEmpty()) {
+                $parts[] = $part;
+            }
+            $i++;
+        }
+        return \implode(' ', $parts);
+    }
+
+    private function help(): void {
+        echo "Encodes text with a helper that is internal to this project.\n\n";
+        echo "  encode <text>   Print code: plus the lower-case text\n";
+    }
+}

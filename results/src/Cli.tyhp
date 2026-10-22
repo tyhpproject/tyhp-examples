@@ -1,0 +1,128 @@
+<?tyhp
+namespace Results;
+
+class Cli {
+    public function __construct(private TicketDesk $desk): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'add') {
+            return $this->add($args);
+        }
+        if ($command === 'list') {
+            return $this->list();
+        }
+        if ($command === 'show') {
+            return $this->show($args);
+        }
+        if ($command === 'close') {
+            return $this->close($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function add(array<int, string> $args): int {
+        if (!isset($args[2]) || !isset($args[3])) {
+            echo "Usage: add <requester> <title words>\n";
+            return 1;
+        }
+        $requester = $args[2]->trim();
+        array<int, string> $parts = [];
+        int $count = \count($args);
+        int $i = 3;
+        while ($i < $count) {
+            $part = $args[$i]->trim();
+            if ($part->isNotEmpty()) {
+                $parts[] = $part;
+            }
+            $i++;
+        }
+        if ($requester->isEmpty() || $parts === []) {
+            echo "Usage: add <requester> <title words>\n";
+            return 1;
+        }
+        $title = \implode(' ', $parts);
+        $result = $this->desk->add($title, $requester);
+        $ticket = $result->value();
+        if ($ticket === null) {
+            echo ($result->error() ?? 'Could not add ticket.') . "\n";
+            return 1;
+        }
+        echo $ticket->summary() . "\n";
+        return 0;
+    }
+
+    private function list(): int {
+        $rows = $this->desk->all()->rows();
+        if ($rows === []) {
+            echo "No tickets yet.\n";
+            return 0;
+        }
+        foreach ($rows as $ticket) {
+            echo $ticket->summary() . "\n";
+        }
+        return 0;
+    }
+
+    private function show(array<int, string> $args): int {
+        $id = $this->requireId($args);
+        if ($id === null) {
+            return 1;
+        }
+        $result = $this->desk->show($id);
+        if (!$result->isOk()) {
+            echo ($result->error() ?? 'Not found.') . "\n";
+            return 1;
+        }
+        $summary = $result->value();
+        if ($summary === null) {
+            echo "Not found.\n";
+            return 1;
+        }
+        echo $summary . "\n";
+        return 0;
+    }
+
+    private function close(array<int, string> $args): int {
+        $id = $this->requireId($args);
+        if ($id === null) {
+            return 1;
+        }
+        $result = $this->desk->close($id);
+        $ticket = $result->value();
+        if (!$result->isOk() || $ticket === null) {
+            echo ($result->error() ?? 'Not found.') . "\n";
+            return 1;
+        }
+        echo "Closed " . $ticket->summary() . "\n";
+        return 0;
+    }
+
+    private function requireId(array<int, string> $args): ?int {
+        if (!isset($args[2]) || !$args[2]->isNumeric()) {
+            echo "Usage: {$args[1]} <id>\n";
+            return null;
+        }
+        return $args[2]->__toInt();
+    }
+
+    private function help(): void {
+        echo "Helpdesk tickets stored as JSON (TICKETS_FILE, or tickets.json).\n";
+        echo "Lookups return Result<T> instead of throwing for a missing id.\n\n";
+        echo "  add <requester> <title>   Open a ticket\n";
+        echo "  list                      Print every ticket\n";
+        echo "  show <id>                 Print one ticket\n";
+        echo "  close <id>                Close a ticket\n";
+    }
+}

@@ -1,0 +1,23 @@
+<?tyhp 
+namespace Contacts;
+
+class Contact {
+    public function __construct(
+        public int $id,
+        public string $name,
+        public string $email,
+        public ?string $phone,
+        public ?string $company,
+    ): void {}
+
+    public function matches(string $query): bool {
+        string $needle = $query->trim()->toLower();
+        if ($needle->isEmpty()) {
+            return false;
+        }
+        if ($this->name->toLower()->contains($needle)) {
+            return true;
+        }
+        return $this->email->toLower()->contains($needle);
+    }
+}

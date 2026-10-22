@@ -1,0 +1,15 @@
+<?tyhp
+namespace Codes;
+
+internal class Encoder {
+    public function encode(string $text): string {
+        return 'code:' . $text->toLower();
+    }
+}
+
+class CodeBook {
+    public function encode(string $text): string {
+        Encoder $encoder = new Encoder();
+        return $encoder->encode($text);
+    }
+}

@@ -1,0 +1,60 @@
+<?tyhp
+namespace AsyncJobs;
+
+use Tyhp\EventLoop;
+
+class Cli {
+    public function __construct(private Greetings $greetings): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'greet') {
+            return $this->greet($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function greet(array<int, string> $args): int {
+        array<int, string> $names = $this->names($args);
+        if ($names === []) {
+            echo "Usage: greet <name>...\n";
+            return 1;
+        }
+
+        array<string> $lines = EventLoop::getInstance()->run($this->greetings->all($names));
+        foreach ($lines as string $line) {
+            echo $line . "\n";
+        }
+        return 0;
+    }
+
+    private function names(array<int, string> $args): array<int, string> {
+        array<int, string> $names = [];
+        int $count = \count($args);
+        int $i = 2;
+        while ($i < $count) {
+            $name = $args[$i]->trim();
+            if ($name->isNotEmpty()) {
+                $names[] = $name;
+            }
+            $i++;
+        }
+        return $names;
+    }
+
+    private function help(): void {
+        echo "Greets each name. The calls start together and await Promise::all().\n\n";
+        echo "  greet <name>...   Print the names after a short concurrent delay\n";
+    }
+}

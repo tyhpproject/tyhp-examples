@@ -1,0 +1,5 @@
+<?tyhp
+namespace Guards;
+
+$cli = new Cli(new Checker());
+exit($cli->run($argv));

@@ -1,0 +1,11 @@
+<?tyhp 
+namespace Contacts;
+
+$path = \getenv('CONTACTS_FILE');
+string $file = 'contacts.json';
+if ($path is string && $path->isNotEmpty()) {
+    $file = $path;
+}
+
+$cli = new Cli(new ContactStore($file));
+exit($cli->run($argv));

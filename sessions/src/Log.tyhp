@@ -1,0 +1,16 @@
+<?tyhp
+namespace Sessions;
+
+use Tyhp\Contracts\IsDisposable;
+
+class Log implements IsDisposable {
+    public function __construct(private string $name): void {}
+
+    public function line(string $text): string {
+        return $this->name . ': ' . $text;
+    }
+
+    public function dispose(): void {
+        echo "closed {$this->name}\n";
+    }
+}

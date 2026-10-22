@@ -1,0 +1,14 @@
+# Composer dependencies. composer.lock is kept so each example installs the same packages.
+vendor/
+
+# tyhp init / tyhp build
+build/
+tyhp.pid
+.tyhp-cache/
+vendor-tyhpdef/
+
+# OS and IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,86 @@
+<?tyhp 
+namespace Contacts;
+
+class ContactStore {
+    public function __construct(private string $path): void {}
+
+    public function all(): array<Contact> {
+        $file = $this->read();
+        array<Contact> $contacts = [];
+        foreach ($file->contacts as $record) {
+            $contacts[] = new Contact(
+                $record->id,
+                $record->name,
+                $record->email,
+                $record->phone,
+                $record->company,
+            );
+        }
+        return $contacts;
+    }
+
+    public function add(string $name, string $email, ?string $phone, ?string $company): Contact {
+        $contacts = $this->all();
+        int $nextId = 1;
+        foreach ($contacts as $contact) {
+            if ($contact->id >= $nextId) {
+                $nextId = $contact->id + 1;
+            }
+        }
+        $created = new Contact($nextId, $name, $email, $phone, $company);
+        $contacts[] = $created;
+        $this->write($contacts);
+        return $created;
+    }
+
+    public function remove(int $id): bool {
+        $contacts = $this->all();
+        array<Contact> $kept = [];
+        bool $found = false;
+        foreach ($contacts as $contact) {
+            if ($contact->id === $id) {
+                $found = true;
+                continue;
+            }
+            $kept[] = $contact;
+        }
+        if ($found) {
+            $this->write($kept);
+        }
+        return $found;
+    }
+
+    private function read(): ContactFile {
+        if (!\is_file($this->path)) {
+            return new ContactFile();
+        }
+        $raw = \file_get_contents($this->path);
+        if ($raw === false || $raw->isEmpty()) {
+            return new ContactFile();
+        }
+        ContactFile $file = new ContactFile();
+        if (!$raw->jsonTryDecodeAs<ContactFile>($file)) {
+            return new ContactFile();
+        }
+        return $file;
+    }
+
+    private function write(array<Contact> $contacts): void {
+        array<ContactRecord> $records = [];
+        foreach ($contacts as $contact) {
+            $records[] = new ContactRecord() with [
+                id => $contact->id,
+                name => $contact->name,
+                email => $contact->email,
+                phone => $contact->phone,
+                company => $contact->company,
+            ];
+        }
+        $file = new ContactFile() with [contacts => $records];
+        string $json = \json_encode($file, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
+        $written = \file_put_contents($this->path, $json . "\n");
+        if ($written === false) {
+            throw new \RuntimeException('Could not write ' . $this->path);
+        }
+    }
+}

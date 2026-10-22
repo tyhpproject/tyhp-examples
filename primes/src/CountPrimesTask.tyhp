@@ -1,0 +1,28 @@
+<?tyhp
+namespace Primes;
+
+use Tyhp\ParallelTask;
+
+final class CountPrimesTask implements ParallelTask<int> {
+    public function __construct(
+        private int $from,
+        private int $to,
+    ): void {}
+
+    public function run(): int {
+        int $count = 0;
+        for (int $n = \max(2, $this->from); $n < $this->to; $n++) {
+            bool $prime = true;
+            for (int $d = 2; $d * $d <= $n; $d++) {
+                if ($n % $d === 0) {
+                    $prime = false;
+                    break;
+                }
+            }
+            if ($prime) {
+                $count++;
+            }
+        }
+        return $count;
+    }
+}

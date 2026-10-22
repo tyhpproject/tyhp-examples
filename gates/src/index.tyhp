@@ -1,0 +1,5 @@
+<?tyhp
+namespace Gates;
+
+$cli = new Cli(new Probe());
+exit($cli->run($argv));

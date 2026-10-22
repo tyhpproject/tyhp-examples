@@ -1,0 +1,104 @@
+<?tyhp
+namespace ConfigTool;
+
+class Cli {
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'show') {
+            return $this->show($args);
+        }
+        if ($command === 'check') {
+            return $this->check($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function show(array<int, string> $args): int {
+        $loaded = $this->load($args);
+        if ($loaded === null) {
+            return 1;
+        }
+        if ($loaded === []) {
+            echo "No values loaded.\n";
+            return 0;
+        }
+        foreach ($loaded as $key => $value) {
+            string $shown = '(empty)';
+            if ($value !== null && $value !== '') {
+                $shown = $value;
+            }
+            echo "{$key}={$shown}\n";
+        }
+        return 0;
+    }
+
+    private function check(array<int, string> $args): int {
+        $loaded = $this->load($args);
+        if ($loaded === null) {
+            return 1;
+        }
+        array<int, string> $keys = $this->keys($args);
+        if ($keys === []) {
+            echo "Usage: check <file.env> <KEY> [KEY...]\n";
+            return 1;
+        }
+        int $missing = 0;
+        foreach ($keys as $key) {
+            ?string $value = null;
+            if (isset($loaded[$key])) {
+                $value = $loaded[$key];
+            }
+            if ($value === null || $value === '') {
+                echo "Missing {$key}\n";
+                $missing++;
+                continue;
+            }
+            echo "{$key} is set\n";
+        }
+        return $missing === 0 ? 0 : 1;
+    }
+
+    private function load(array<int, string> $args): ?array<string, string|null> {
+        if (!isset($args[2]) || $args[2]->isEmpty()) {
+            echo "Usage: {$args[1]} <file.env> [KEY...]\n";
+            return null;
+        }
+        $path = $args[2];
+        if (!\is_file($path)) {
+            echo "No env file at {$path}\n";
+            return null;
+        }
+        return (new EnvFile($path))->load();
+    }
+
+    private function keys(array<int, string> $args): array<int, string> {
+        array<int, string> $keys = [];
+        int $count = \count($args);
+        int $i = 3;
+        while ($i < $count) {
+            $key = $args[$i]->trim();
+            if ($key->isNotEmpty()) {
+                $keys[] = $key;
+            }
+            $i++;
+        }
+        return $keys;
+    }
+
+    private function help(): void {
+        echo "Load a .env file with vlucas/phpdotenv and print or check keys.\n\n";
+        echo "  show <file.env>                 Print every loaded key\n";
+        echo "  check <file.env> <KEY> [KEY...] Exit 1 when a key is missing or empty\n";
+    }
+}

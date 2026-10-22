@@ -1,0 +1,11 @@
+<?tyhp
+namespace Recipes;
+
+$path = \getenv('RECIPES_FILE');
+string $file = 'recipes.json';
+if ($path is string && $path->isNotEmpty()) {
+    $file = $path;
+}
+
+$cli = new Cli(new RecipeBox($file), new Scaler());
+exit($cli->run($argv));

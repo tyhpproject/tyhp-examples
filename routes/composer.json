@@ -1,0 +1,71 @@
+{
+    "name": "app/routes",
+    "description": "Build paths with a template string type",
+    "type": "project",
+    "require": {
+        "php": "~8.5.0",
+        "tyhp/core": "805.0.2",
+        "tyhp/async": "805.0.2",
+        "tyhp/decimal": "805.0.2",
+        "tyhp/lambda": "805.0.2"
+    },
+    "require-dev": {
+        "tyhpdef/php": "@dev",
+        "tyhp/compiler": "805.1.0-beta.2"
+    },
+    "config": {
+        "allow-plugins": {
+            "tyhp/core": true
+        }
+    },
+    "minimum-stability": "alpha",
+    "prefer-stable": true,
+    "scripts": {
+        "tyhp": "vendor/bin/tyhp",
+        "post-autoload-dump": [
+            "vendor/bin/tyhp --install-binary",
+            "vendor/bin/tyhp generate_tyhpdef --vendor"
+        ]
+    },
+    "scripts-descriptions": {
+        "tyhp": "Forward extra args to the Tyhp CLI (e.g. composer tyhp build)"
+    },
+    "autoload": {
+        "psr-4": {
+            "Routes\\": "build/Routes/"
+        },
+        "files": [
+            "build/Routes/_functions.php"
+        ]
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/Users/anthonyrainer/repos/tyhp-runtime-src/packages/dist/tyhp-core/805.0.2",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "/Users/anthonyrainer/repos/tyhp-runtime-src/packages/dist/tyhp-async/805.0.2",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "/Users/anthonyrainer/repos/tyhp-runtime-src/packages/dist/tyhp-decimal/805.0.2",
+            "options": {
+                "symlink": true
+            }
+        },
+        {
+            "type": "path",
+            "url": "/Users/anthonyrainer/repos/tyhp-runtime-src/packages/dist/tyhp-lambda/805.0.2",
+            "options": {
+                "symlink": true
+            }
+        }
+    ]
+}

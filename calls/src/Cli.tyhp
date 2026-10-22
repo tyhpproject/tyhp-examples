@@ -1,0 +1,56 @@
+<?tyhp
+namespace Calls;
+
+class Cli {
+    public function __construct(private Caller $caller): void {}
+
+    public function run(array<int, string> $args): int {
+        string $command = 'help';
+        if (isset($args[1]) && $args[1]->isNotEmpty()) {
+            $command = $args[1]->toLower();
+        }
+
+        if ($command === 'shout') {
+            return $this->shout($args);
+        }
+        if ($command === 'help' || $command === '--help') {
+            $this->help();
+            return 0;
+        }
+
+        echo "Unknown command: {$command}\n\n";
+        $this->help();
+        return 1;
+    }
+
+    private function shout(array<int, string> $args): int {
+        string $text = $this->join($args, 2);
+        if ($text->isEmpty()) {
+            echo "Usage: shout <text>\n";
+            return 1;
+        }
+        Caller $caller = $this->caller;
+        string $out = $caller->apply($caller->shout(...), ['text' => $text]);
+        echo $out . "\n";
+        return 0;
+    }
+
+    private function join(array<int, string> $args, int $start): string {
+        array<int, string> $parts = [];
+        int $count = \count($args);
+        int $i = $start;
+        while ($i < $count) {
+            $part = $args[$i]->trim();
+            if ($part->isNotEmpty()) {
+                $parts[] = $part;
+            }
+            $i++;
+        }
+        return \implode(' ', $parts);
+    }
+
+    private function help(): void {
+        echo "Uppercases text by calling shout through apply.\n\n";
+        echo "  shout <text>   Print the text in upper case\n";
+    }
+}

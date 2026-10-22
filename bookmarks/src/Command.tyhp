@@ -1,0 +1,9 @@
+<?tyhp 
+namespace Bookmarks;
+
+enum Command: string {
+    case Add = 'add';
+    case List = 'list';
+    case Search = 'search';
+    case Remove = 'remove';
+}
