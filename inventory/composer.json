@@ -4,14 +4,14 @@
     "type": "project",
     "require": {
         "php": "~8.5.0",
-        "tyhp/core": "805.0.2",
-        "tyhp/async": "805.0.2",
-        "tyhp/decimal": "805.0.2",
-        "tyhp/lambda": "805.0.2"
+        "tyhp/core": "805.0.3",
+        "tyhp/async": "805.0.3",
+        "tyhp/decimal": "805.0.3",
+        "tyhp/lambda": "805.0.3"
     },
     "require-dev": {
-        "tyhpdef/php": "@dev",
-        "tyhp/compiler": "805.1.0-beta.2"
+        "tyhpdef/php": "0.0.3",
+        "tyhp/compiler": "805.1.2-beta.3"
     },
     "config": {
         "allow-plugins": {
@@ -37,35 +37,5 @@
         "files": [
             "build/Inventory/_functions.php"
         ]
-    },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "/Users/anthonyrainer/repos/tyhp-runtime-src/packages/dist/tyhp-core/805.0.2",
-            "options": {
-                "symlink": true
-            }
-        },
-        {
-            "type": "path",
-            "url": "/Users/anthonyrainer/repos/tyhp-runtime-src/packages/dist/tyhp-async/805.0.2",
-            "options": {
-                "symlink": true
-            }
-        },
-        {
-            "type": "path",
-            "url": "/Users/anthonyrainer/repos/tyhp-runtime-src/packages/dist/tyhp-decimal/805.0.2",
-            "options": {
-                "symlink": true
-            }
-        },
-        {
-            "type": "path",
-            "url": "/Users/anthonyrainer/repos/tyhp-runtime-src/packages/dist/tyhp-lambda/805.0.2",
-            "options": {
-                "symlink": true
-            }
-        }
-    ]
+    }
 }

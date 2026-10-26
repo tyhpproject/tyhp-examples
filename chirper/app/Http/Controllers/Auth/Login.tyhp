@@ -1,0 +1,35 @@
+<?tyhp 
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+
+class Login extends Controller
+{
+    public function __invoke(Request $request): RedirectResponse
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ], []);
+
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+
+            return Redirect::intended('/', 302, [], null)->with('success', 'Welcome back!');
+        }
+
+        $response = Redirect::back(302, [], false)
+            ->withErrors(['email' => 'The provided credentials do not match our records.']);
+        $submittedEmail = $credentials['email'] ?? null;
+        if (\is_string($submittedEmail)) {
+            return $response->withInput(['email' => $submittedEmail]);
+        }
+
+        return $response;
+    }
+}

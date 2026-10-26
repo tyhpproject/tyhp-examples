@@ -1,0 +1,6 @@
+<?tyhpdef
+
+// Intervention Image's Imagick driver names these classes. The extension is optional.
+extern class \Imagick;
+extern class \ImagickDraw;
+extern class \ImagickPixel;

@@ -1,0 +1,142 @@
+<?tyhp 
+
+namespace App\Http\Controllers;
+
+use App\Models\Chirp;
+use App\Models\User;
+use Illuminate\Contracts\View\View as ViewContract;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\View;
+
+class ChirpController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(): ViewContract
+    {
+        $chirpsQuery = Chirp::with('user')->latest();
+        $chirpsQuery->getQuery()->take(50);
+        $chirps = $chirpsQuery->get();
+
+        return View::make('home', ['chirps' => $chirps], []);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create(): void
+    {
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'message' => 'required|string|max:255',
+        ], [
+            'message.required' => 'Please write something to chirp!',
+            'message.max' => 'Chirps must be 255 characters or less.',
+        ]);
+
+        $message = $this->stringValue($validated, 'message');
+        $account = Auth::user();
+        if ($account instanceof User) {
+            $account->chirps()->create([
+                'message' => $message,
+            ]);
+
+            return Redirect::to('/', 302, [], null)->with('success', 'Your chirp has been posted!');
+        }
+
+        App::abort(403, 'Unauthorized', []);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id): void
+    {
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Chirp $chirp): ViewContract
+    {
+        $this->denyUnlessOwner($chirp);
+
+        return View::make('chirps.edit', ['chirp' => $chirp], []);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Chirp $chirp): RedirectResponse
+    {
+        $this->denyUnlessOwner($chirp);
+
+        $validated = $request->validate([
+            'message' => 'required|string|max:255',
+        ], []);
+
+        $chirp->update([
+            'message' => $this->stringValue($validated, 'message'),
+        ]);
+
+        return Redirect::to('/', 302, [], null)->with('success', 'Chirp updated!');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Chirp $chirp): RedirectResponse
+    {
+        $this->denyUnlessOwner($chirp);
+
+        $chirp->delete();
+
+        return Redirect::to('/', 302, [], null)->with('success', 'Chirp deleted!');
+    }
+
+    private function denyUnlessOwner(Chirp $chirp): void
+    {
+        if ($this->currentUserOwns($chirp) === false) {
+            App::abort(403, 'Unauthorized', []);
+        }
+    }
+
+    private function currentUserOwns(Chirp $chirp): bool
+    {
+        $actorId = Auth::id();
+        if ($actorId === null) {
+            return false;
+        }
+
+        $ownerId = $chirp->user_id;
+        if (\is_int($ownerId)) {
+            return $ownerId === $actorId;
+        }
+        if (\is_string($ownerId)) {
+            return $ownerId === $actorId;
+        }
+
+        return false;
+    }
+
+    private function stringValue(array $validated, string $key): string
+    {
+        $value = $validated[$key] ?? null;
+        if (\is_string($value)) {
+            return $value;
+        }
+
+        throw new \InvalidArgumentException('Expected a string.');
+    }
+}

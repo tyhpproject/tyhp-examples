@@ -4,15 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1d72a747720f8413ee56defcbbf85878",
+    "content-hash": "f785d81c6219152ca320e1f8ffa3cc9b",
     "packages": [
         {
             "name": "tyhp/async",
-            "version": "805.0.2",
+            "version": "805.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tyhpproject-packages/async.git",
+                "reference": "f31b5f9569d615a5e3b07792e77a5c6d86ccc298"
+            },
             "dist": {
-                "type": "path",
-                "url": "/Users/anthonyrainer/repos/tyhp-runtime-src/packages/dist/tyhp-async/805.0.2",
-                "reference": "861de8a7b1e5c156f3062f7510c02548f0e2c93f"
+                "type": "zip",
+                "url": "https://api.github.com/repos/tyhpproject-packages/async/zipball/f31b5f9569d615a5e3b07792e77a5c6d86ccc298",
+                "reference": "f31b5f9569d615a5e3b07792e77a5c6d86ccc298",
+                "shasum": ""
             },
             "require": {
                 "php": ">=8.5",
@@ -24,46 +30,54 @@
             "type": "library",
             "extra": {
                 "tyhp": {
-                    "interopContractVersion": 1,
-                    "require": {
-                        "tyhpdef/php": "@dev"
-                    },
                     "package": {
+                        "source": {
+                            "tagless": false
+                        },
+                        "exclude": [],
                         "include": [
                             "./package.tyhpdef"
                         ],
-                        "exclude": [],
-                        "overlay": [],
-                        "source": {
-                            "tagless": false
-                        }
-                    }
+                        "overlay": []
+                    },
+                    "require": {
+                        "tyhpdef/php": "@dev"
+                    },
+                    "interopContractVersion": 1
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Tyhp\\": "src/Tyhp/"
-                },
                 "files": [
                     "src/_functions.php"
-                ]
+                ],
+                "psr-4": {
+                    "Tyhp\\": "src/Tyhp/"
+                }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "Apache-2.0"
             ],
             "description": "Tyhp runtime async (PHP 8.5) — Promise, event loop, CancellationToken, async iteration",
-            "transport-options": {
-                "symlink": true,
-                "relative": false
-            }
+            "support": {
+                "issues": "https://github.com/tyhpproject-packages/async/issues",
+                "source": "https://github.com/tyhpproject-packages/async/tree/805.0.3"
+            },
+            "time": "2026-10-22T15:46:18+00:00"
         },
         {
             "name": "tyhp/core",
-            "version": "805.0.2",
+            "version": "805.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tyhpproject-packages/core.git",
+                "reference": "0ab2f17bcf2984067cf4637e28dbd057d8dfe91f"
+            },
             "dist": {
-                "type": "path",
-                "url": "/Users/anthonyrainer/repos/tyhp-runtime-src/packages/dist/tyhp-core/805.0.2",
-                "reference": "7f67fe9e3e243e009f621e5fb391a9947bb38091"
+                "type": "zip",
+                "url": "https://api.github.com/repos/tyhpproject-packages/core/zipball/0ab2f17bcf2984067cf4637e28dbd057d8dfe91f",
+                "reference": "0ab2f17bcf2984067cf4637e28dbd057d8dfe91f",
+                "shasum": ""
             },
             "require": {
                 "composer-plugin-api": "^2.3",
@@ -79,48 +93,56 @@
             "type": "composer-plugin",
             "extra": {
                 "tyhp": {
-                    "interopContractVersion": 1,
-                    "require": {
-                        "tyhpdef/php": "@dev"
-                    },
                     "package": {
+                        "source": {
+                            "tagless": false
+                        },
+                        "exclude": [],
                         "include": [
                             "./package.tyhpdef"
                         ],
-                        "exclude": [],
-                        "overlay": [],
-                        "source": {
-                            "tagless": false
-                        }
-                    }
+                        "overlay": []
+                    },
+                    "require": {
+                        "tyhpdef/php": "@dev"
+                    },
+                    "interopContractVersion": 1
                 },
                 "class": "Tyhp\\Composer\\Plugin"
             },
             "autoload": {
+                "files": [
+                    "src/_functions.php"
+                ],
                 "psr-4": {
                     "Tyhp\\": "src/Tyhp/",
                     "Tyhp\\Composer\\": "plugin/"
-                },
-                "files": [
-                    "src/_functions.php"
-                ]
+                }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "Apache-2.0"
             ],
             "description": "Tyhp runtime core (PHP 8.5) — type system, generics, typed variables, property accessors",
-            "transport-options": {
-                "symlink": true,
-                "relative": false
-            }
+            "support": {
+                "issues": "https://github.com/tyhpproject-packages/core/issues",
+                "source": "https://github.com/tyhpproject-packages/core/tree/805.0.3"
+            },
+            "time": "2026-10-22T15:46:34+00:00"
         },
         {
             "name": "tyhp/decimal",
-            "version": "805.0.2",
+            "version": "805.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tyhpproject-packages/decimal.git",
+                "reference": "87b765823f1426c25e6501a02543e8f0c8b348b2"
+            },
             "dist": {
-                "type": "path",
-                "url": "/Users/anthonyrainer/repos/tyhp-runtime-src/packages/dist/tyhp-decimal/805.0.2",
-                "reference": "dcc2cc46a6ac1614b48e3d4646e97f677126c6a3"
+                "type": "zip",
+                "url": "https://api.github.com/repos/tyhpproject-packages/decimal/zipball/87b765823f1426c25e6501a02543e8f0c8b348b2",
+                "reference": "87b765823f1426c25e6501a02543e8f0c8b348b2",
+                "shasum": ""
             },
             "require": {
                 "php": ">=8.5",
@@ -137,46 +159,54 @@
             "type": "library",
             "extra": {
                 "tyhp": {
-                    "interopContractVersion": 1,
-                    "require": {
-                        "tyhpdef/php": "@dev"
-                    },
                     "package": {
+                        "source": {
+                            "tagless": false
+                        },
+                        "exclude": [],
                         "include": [
                             "./package.tyhpdef"
                         ],
-                        "exclude": [],
-                        "overlay": [],
-                        "source": {
-                            "tagless": false
-                        }
-                    }
+                        "overlay": []
+                    },
+                    "require": {
+                        "tyhpdef/php": "@dev"
+                    },
+                    "interopContractVersion": 1
                 }
             },
             "autoload": {
-                "psr-4": {
-                    "Tyhp\\": "src/Tyhp/"
-                },
                 "files": [
                     "src/Tyhp/_functions.php"
-                ]
+                ],
+                "psr-4": {
+                    "Tyhp\\": "src/Tyhp/"
+                }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "Apache-2.0"
             ],
             "description": "Tyhp runtime decimal (PHP 8.5) — arbitrary-precision decimal arithmetic",
-            "transport-options": {
-                "symlink": true,
-                "relative": false
-            }
+            "support": {
+                "issues": "https://github.com/tyhpproject-packages/decimal/issues",
+                "source": "https://github.com/tyhpproject-packages/decimal/tree/805.0.3"
+            },
+            "time": "2026-10-22T15:46:44+00:00"
         },
         {
             "name": "tyhp/lambda",
-            "version": "805.0.2",
+            "version": "805.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/tyhpproject-packages/lambda.git",
+                "reference": "cf9968aa49af0bd18b0b7d700260bc3208cc1645"
+            },
             "dist": {
-                "type": "path",
-                "url": "/Users/anthonyrainer/repos/tyhp-runtime-src/packages/dist/tyhp-lambda/805.0.2",
-                "reference": "ea6deccfd850101b5a30024c447b9a02a7b59a3f"
+                "type": "zip",
+                "url": "https://api.github.com/repos/tyhpproject-packages/lambda/zipball/cf9968aa49af0bd18b0b7d700260bc3208cc1645",
+                "reference": "cf9968aa49af0bd18b0b7d700260bc3208cc1645",
+                "shasum": ""
             },
             "require": {
                 "php": ">=8.5",
@@ -188,20 +218,20 @@
             "type": "library",
             "extra": {
                 "tyhp": {
-                    "interopContractVersion": 1,
-                    "require": {
-                        "tyhpdef/php": "@dev"
-                    },
                     "package": {
+                        "source": {
+                            "tagless": false
+                        },
+                        "exclude": [],
                         "include": [
                             "./package.tyhpdef"
                         ],
-                        "exclude": [],
-                        "overlay": [],
-                        "source": {
-                            "tagless": false
-                        }
-                    }
+                        "overlay": []
+                    },
+                    "require": {
+                        "tyhpdef/php": "@dev"
+                    },
+                    "interopContractVersion": 1
                 }
             },
             "autoload": {
@@ -212,29 +242,31 @@
                     "php/EvalClosure.php"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "Apache-2.0"
             ],
             "description": "Tyhp runtime parsable lambdas (PHP 8.5): PropertyPath and Expression tree runtime classes",
-            "transport-options": {
-                "symlink": true,
-                "relative": false
-            }
+            "support": {
+                "issues": "https://github.com/tyhpproject-packages/lambda/issues",
+                "source": "https://github.com/tyhpproject-packages/lambda/tree/805.0.3"
+            },
+            "time": "2026-10-22T15:47:09+00:00"
         }
     ],
     "packages-dev": [
         {
             "name": "tyhp/compiler",
-            "version": "805.1.0-beta.2",
+            "version": "805.1.2-beta.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tyhpproject-packages/compiler.git",
-                "reference": "0e8cec1174be32cc3bc22dd61bf09f376db04d47"
+                "reference": "3a712cb7cad6409423928b256c463048821f5c0a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tyhpproject-packages/compiler/zipball/0e8cec1174be32cc3bc22dd61bf09f376db04d47",
-                "reference": "0e8cec1174be32cc3bc22dd61bf09f376db04d47",
+                "url": "https://api.github.com/repos/tyhpproject-packages/compiler/zipball/3a712cb7cad6409423928b256c463048821f5c0a",
+                "reference": "3a712cb7cad6409423928b256c463048821f5c0a",
                 "shasum": ""
             },
             "require": {
@@ -252,6 +284,9 @@
             ],
             "type": "library",
             "autoload": {
+                "files": [
+                    "src/Tyhp/Compiler/_functions.php"
+                ],
                 "psr-4": {
                     "Tyhp\\Compiler\\": "src/Tyhp/Compiler/"
                 }
@@ -270,20 +305,20 @@
                 "issues": "https://github.com/tyhpproject/tyhp/issues",
                 "source": "https://github.com/tyhpproject/tyhp"
             },
-            "time": "2026-10-15T17:04:21+00:00"
+            "time": "2026-10-23T23:20:13+00:00"
         },
         {
             "name": "tyhpdef/php",
-            "version": "0.0.2",
+            "version": "0.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tyhpproject-packages/php.git",
-                "reference": "39a4ef6a210e1bcfce741f82bc3bef2c145825c5"
+                "reference": "ed64391d5973ac47a101bb53c26bd6963b021c77"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tyhpproject-packages/php/zipball/39a4ef6a210e1bcfce741f82bc3bef2c145825c5",
-                "reference": "39a4ef6a210e1bcfce741f82bc3bef2c145825c5",
+                "url": "https://api.github.com/repos/tyhpproject-packages/php/zipball/ed64391d5973ac47a101bb53c26bd6963b021c77",
+                "reference": "ed64391d5973ac47a101bb53c26bd6963b021c77",
                 "shasum": ""
             },
             "require": {
@@ -335,16 +370,14 @@
             ],
             "support": {
                 "issues": "https://github.com/tyhpproject-packages/php/issues",
-                "source": "https://github.com/tyhpproject-packages/php/tree/0.0.2"
+                "source": "https://github.com/tyhpproject-packages/php/tree/0.0.3"
             },
-            "time": "2026-10-06T13:17:17+00:00"
+            "time": "2026-10-15T22:47:33+00:00"
         }
     ],
     "aliases": [],
     "minimum-stability": "alpha",
-    "stability-flags": {
-        "tyhpdef/php": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

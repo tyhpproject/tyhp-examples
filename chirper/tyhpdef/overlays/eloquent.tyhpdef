@@ -1,0 +1,14 @@
+<?tyhpdef
+
+namespace Illuminate\Database\Eloquent;
+
+// HasOneOrMany takes a third result type. The published declaration supplied two.
+// @overlay-against: class PendingHasThroughRelationship
+partial class PendingHasThroughRelationship<TIntermediateModel extends \Illuminate\Database\Eloquent\Model, TDeclaringModel extends \Illuminate\Database\Eloquent\Model, TLocalRelationship extends \Illuminate\Database\Eloquent\Relations\HasOneOrMany<TIntermediateModel, TDeclaringModel, mixed>>;
+
+namespace Illuminate\Database\Eloquent\Relations;
+
+// Relationship declarations use `static` for the parent model. Keep that parent
+// type open so a trait method can name it.
+partial class BelongsTo<TRelatedModel extends \Illuminate\Database\Eloquent\Model, TDeclaringModel>;
+partial class HasMany<TRelatedModel extends \Illuminate\Database\Eloquent\Model, TDeclaringModel>;

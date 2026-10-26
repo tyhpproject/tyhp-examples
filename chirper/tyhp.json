@@ -1,0 +1,28 @@
+{
+  "include": [
+    "app/**/*.tyhp",
+    "database/**/*.tyhp",
+    "routes/**/*.tyhp",
+    "tests/**/*.tyhp",
+    "tyhpdef/externs.tyhpdef"
+  ],
+  "exclude": [
+    "vendor/**",
+    "node_modules/**"
+  ],
+  "overlay": [
+    "./tyhpdef/overlays/**/*.tyhpdef"
+  ],
+  "source": {
+    "tagless": false
+  },
+  "output": {
+    "path": "build/",
+    "phpVersion": "8.5",
+    "strictTypes": true,
+    "comments": true
+  },
+  "psr4": {
+    "App\\": "app/"
+  }
+}

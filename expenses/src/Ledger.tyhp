@@ -5,7 +5,7 @@ class Ledger {
     public function sum(array<Expense> $expenses): decimal {
         decimal $total = \Tyhp\decimal('0.00');
         foreach ($expenses as $expense) {
-            $total += $expense->amount;
+            $total = $total->add($expense->amount);
         }
         return $total;
     }

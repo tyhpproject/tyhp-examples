@@ -2,7 +2,7 @@
 
 A file-backed command-line expense tracker. Expenses are stored as JSON (the `EXPENSES_FILE` environment variable, or `expenses.json` in the current directory).
 
-Tyhp features in this example: classes, a backed enum, structs, `tyhp/decimal` operators (`+=`, `<=`), `->format()` for totals, and `jsonTryDecodeAs<T>()` to load JSON into a struct. Amounts are stored as decimal strings and converted with `\Tyhp\decimal()` when they are read.
+Tyhp features in this example: classes, a backed enum, structs, `tyhp/decimal` methods (`add()`, `lessThanOrEqual()`), `->format()` for totals, and `jsonTryDecodeAs<T>()` to load JSON into a struct. Amounts are stored as decimal strings and converted with `\Tyhp\decimal()` when they are read.
 
 ## Install and run
 

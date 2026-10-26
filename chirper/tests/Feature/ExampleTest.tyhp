@@ -1,0 +1,71 @@
+<?tyhp
+
+namespace Tests\Feature;
+
+use App\Models\Chirp;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class ExampleTest extends \Tests\TestCase
+{
+    use RefreshDatabase;
+
+    public function test_the_application_returns_a_successful_response(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertStatus(200);
+    }
+
+    public function test_guests_are_sent_to_login_when_posting_a_chirp(): void
+    {
+        $this->post('/chirps', [
+            'message' => 'Nope',
+        ])->assertRedirect('/login');
+    }
+
+    public function test_a_member_can_post_edit_and_delete_a_chirp(): void
+    {
+        $this->post('/register', [
+            'name' => 'Ada Lovelace',
+            'email' => 'ada@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertRedirect('/');
+
+        $this->post('/chirps', [
+            'message' => 'Hello from Tyhp',
+        ])->assertRedirect('/');
+
+        $this->get('/')->assertSee('Hello from Tyhp');
+
+        $chirp = Chirp::query()->first();
+        if (!$chirp instanceof Chirp) {
+            throw new \RuntimeException('Expected a chirp.');
+        }
+
+        $path = '/chirps/' . $this->chirpId($chirp);
+
+        $this->put($path, [
+            'message' => 'Updated chirp',
+        ])->assertRedirect('/');
+
+        $this->get('/')->assertSee('Updated chirp');
+
+        $this->delete($path)->assertRedirect('/');
+
+        $this->get('/')->assertDontSee('Updated chirp');
+    }
+
+    private function chirpId(Chirp $chirp): string
+    {
+        $id = $chirp->id;
+        if (\is_int($id)) {
+            return (string) $id;
+        }
+        if (\is_string($id)) {
+            return $id;
+        }
+
+        throw new \RuntimeException('Expected a chirp id.');
+    }
+}

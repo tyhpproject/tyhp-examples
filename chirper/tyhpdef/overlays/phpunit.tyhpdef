@@ -1,0 +1,7 @@
+<?tyhpdef
+
+// Monolog publishes an empty TestCase so its test namespace can extend PHPUnit
+// without a tyhpdef package. The assertions used here are declared for that class.
+partial class \PHPUnit\Framework\TestCase {
+    public function assertTrue(bool $condition, string $message = ''): void;
+}

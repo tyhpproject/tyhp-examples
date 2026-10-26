@@ -8,7 +8,7 @@ class Money {
             return null;
         }
         decimal $amount = \Tyhp\decimal($text);
-        if ($amount <= 0) {
+        if ($amount->lessThanOrEqual(0)) {
             return null;
         }
         return $amount;
