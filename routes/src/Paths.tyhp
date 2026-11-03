@@ -4,11 +4,7 @@ namespace Routes;
 type ApiPath = "api/${string}/items";
 
 class Paths {
-    public function widgets(): ApiPath {
-        return 'api/widgets/items';
-    }
-
-    public function orders(): ApiPath {
-        return 'api/orders/items';
+    public function items(string $resource): ApiPath {
+        return "api/{$resource}/items";
     }
 }

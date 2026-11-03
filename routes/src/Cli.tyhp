@@ -10,12 +10,8 @@ class Cli {
             $command = $args[1]->toLower();
         }
 
-        if ($command === 'widgets') {
-            echo $this->paths->widgets() . "\n";
-            return 0;
-        }
-        if ($command === 'orders') {
-            echo $this->paths->orders() . "\n";
+        if ($command === 'widgets' || $command === 'orders') {
+            echo $this->paths->items($command) . "\n";
             return 0;
         }
         if ($command === 'help' || $command === '--help') {

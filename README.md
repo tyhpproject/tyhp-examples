@@ -22,7 +22,7 @@ tyhp build
 php build/src/index.php help
 ```
 
-`composer update` installs dependencies from `composer.lock`. `tyhp build` type-checks `src/` and writes PHP under `build/`. Run the commands in that example's README for anything beyond `help`.
+`composer update` resolves the versions in the example's `composer.json` from Packagist, installs them, and rewrites `composer.lock`. To install exactly the versions in the committed `composer.lock`, run `composer install` instead. `tyhp build` type-checks `src/` and writes PHP under `build/`. Run the commands in that example's README for anything beyond `help`.
 
 ## Examples
 

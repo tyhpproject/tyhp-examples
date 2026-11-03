@@ -1,6 +1,7 @@
 # Routes
 
-`widgets` and `orders` return paths whose type is the template `api/${string}/items`.
+`Paths::items()` builds `api/{resource}/items` from a resource name. Its return type is the template
+`api/${string}/items`, and the interpolation `"api/{$resource}/items"` matches that pattern.
 
 ## Install and run
 

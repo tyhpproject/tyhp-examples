@@ -37,8 +37,8 @@ class Cli {
         }
         string $path = $this->path;
         try {
-            string $written = EventLoop::getInstance()->run($this->writeFile($path, $text));
-            echo "wrote {$written}\n";
+            EventLoop::getInstance()->run($this->writeFile($path, $text));
+            echo "wrote {$path}\n";
         } catch (\Throwable $e) {
             echo $e->getMessage() . "\n";
             return 1;
@@ -58,9 +58,8 @@ class Cli {
         return 0;
     }
 
-    private async function writeFile(string $path, string $text): string {
+    private async function writeFile(string $path, string $text): void {
         await File::writeAsync($path, $text . "\n");
-        return $path;
     }
 
     private async function readFile(string $path): string {
