@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e0a615f5ed7cadb8c988b0f0f028ec2a",
+    "content-hash": "1e1e0d0c4c48a63c2d4e9503968e243d",
     "packages": [
         {
             "name": "tyhp/async",
@@ -257,16 +257,16 @@
     "packages-dev": [
         {
             "name": "tyhp/compiler",
-            "version": "805.1.2-beta.3",
+            "version": "805.1.2-beta.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tyhpproject-packages/compiler.git",
-                "reference": "3a712cb7cad6409423928b256c463048821f5c0a"
+                "reference": "b0d55a8482543a27956d5dce244310a007dc8bba"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tyhpproject-packages/compiler/zipball/3a712cb7cad6409423928b256c463048821f5c0a",
-                "reference": "3a712cb7cad6409423928b256c463048821f5c0a",
+                "url": "https://api.github.com/repos/tyhpproject-packages/compiler/zipball/b0d55a8482543a27956d5dce244310a007dc8bba",
+                "reference": "b0d55a8482543a27956d5dce244310a007dc8bba",
                 "shasum": ""
             },
             "require": {
@@ -305,7 +305,7 @@
                 "issues": "https://github.com/tyhpproject/tyhp/issues",
                 "source": "https://github.com/tyhpproject/tyhp"
             },
-            "time": "2026-10-23T23:20:13+00:00"
+            "time": "2026-11-04T15:03:02+00:00"
         },
         {
             "name": "tyhpdef/php",

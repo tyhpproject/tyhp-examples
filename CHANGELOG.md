@@ -4,6 +4,8 @@ Notable changes to the Tyhp example applications in this repository. The format 
 
 ## [Unreleased]
 
+## 2026-11-04
+
 ### Changed
 
 - All examples: require `tyhp/compiler` `805.1.2-beta.4`.
