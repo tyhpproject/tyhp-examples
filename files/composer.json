@@ -12,7 +12,7 @@
     },
     "require-dev": {
         "tyhpdef/php": "0.0.3",
-        "tyhp/compiler": "805.1.2-beta.3"
+        "tyhp/compiler": "805.1.2-beta.4"
     },
     "config": {
         "allow-plugins": {

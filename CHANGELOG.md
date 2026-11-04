@@ -6,8 +6,9 @@ Notable changes to the Tyhp example applications in this repository. The format 
 
 ### Changed
 
-- routes: `Paths::items(string $resource)` replaces `widgets()` and `orders()`, building the path with one interpolation that matches the `api/${string}/items` template type. The commands and output are unchanged. Requires the next Tyhp compiler release after `805.1.2-beta.3`.
-- files: `writeFile` is an `async` function returning `void`, run directly with `EventLoop::run`. The `write` output is unchanged. Requires the next Tyhp compiler release after `805.1.2-beta.3`.
+- All examples: require `tyhp/compiler` `805.1.2-beta.4`.
+- routes: `Paths::items(string $resource)` replaces `widgets()` and `orders()`, building the path with one interpolation that matches the `api/${string}/items` template type. The commands and output are unchanged. Requires Tyhp `805.1.2-beta.4`.
+- files: `writeFile` is an `async` function returning `void`, run directly with `EventLoop::run`. The `write` output is unchanged. Requires Tyhp `805.1.2-beta.4`.
 
 ### Fixed
 

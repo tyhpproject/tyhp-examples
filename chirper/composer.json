@@ -17,7 +17,7 @@
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
         "phpunit/phpunit": "^12.5.12",
-        "tyhp/compiler": "805.1.2-beta.3",
+        "tyhp/compiler": "805.1.2-beta.4",
         "tyhpdef/php": "0.0.3",
         "tyhpdef/laravel-framework": "13.32.0",
         "tyhpdef/brick-math": "0.18.0",

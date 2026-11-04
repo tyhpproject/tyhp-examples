@@ -13,7 +13,7 @@
     "require-dev": {
         "tyhpdef/php": "0.0.3",
         "tyhpdef/vlucas-phpdotenv": "5.7.0",
-        "tyhp/compiler": "805.1.2-beta.3",
+        "tyhp/compiler": "805.1.2-beta.4",
         "tyhpdef/symfony-polyfill-ctype": "1.37.0"
     },
     "config": {
