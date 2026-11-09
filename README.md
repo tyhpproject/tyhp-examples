@@ -54,7 +54,7 @@ php build/src/index.php help
 | [guards](guards/) | Classify a value as a positive int or not. | Custom type guard (`$value is int`) |
 | [routes](routes/) | Print API paths checked as a template string. | Template string type `` `api/${string}/items` `` |
 | [calls](calls/) | Uppercase text through a generic caller. | `__CallableReturnType`, `__CallableParametersStruct` |
-| [chirper](chirper/) | The Laravel Chirper bootcamp, written in Tyhp. | Typed controllers, models, factory, seeder, routes, and tests. Laravel typed through `tyhpdef/laravel-framework` and the Illuminate tyhpdef packages |
+| [chirper](chirper/) | The Laravel Chirper bootcamp, written in Tyhp. Chirps use `tyhp/rhetoric`. `User` stays Eloquent for auth. | Typed controllers, Rhetoric context and models, factory, seeder, routes, and tests |
 
 ## License
 

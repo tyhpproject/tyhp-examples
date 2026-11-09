@@ -1,0 +1,23 @@
+<?tyhp
+
+namespace App\Data;
+
+use Tyhp\Rhetoric\Context;
+use Tyhp\Rhetoric\Mapping\Mapper;
+use Tyhp\Rhetoric\OnDelete;
+use Tyhp\Rhetoric\Table;
+
+class ChirpContext extends Context
+{
+    public Table<Chirp> $chirps {
+        get => $this->table<Chirp>();
+    }
+
+    protected function map(Mapper $map): void
+    {
+        $map->model<Chirp>()
+            ->belongsTo(fn ($chirp) => $chirp->user)
+            ->foreignKey(fn ($chirp) => $chirp->userId)
+            ->onDelete(OnDelete::Cascade);
+    }
+}

@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\Chirp;
+use App\Data\Chirp;
+use App\Data\ChirpContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\App;
 
 class ExampleTest extends \Tests\TestCase
 {
@@ -38,12 +40,12 @@ class ExampleTest extends \Tests\TestCase
 
         $this->get('/')->assertSee('Hello from Tyhp');
 
-        $chirp = Chirp::query()->first();
+        $chirp = $this->chirps()->chirps->first();
         if (!$chirp instanceof Chirp) {
             throw new \RuntimeException('Expected a chirp.');
         }
 
-        $path = '/chirps/' . $this->chirpId($chirp);
+        $path = '/chirps/' . (string) $chirp->id;
 
         $this->put($path, [
             'message' => 'Updated chirp',
@@ -56,16 +58,13 @@ class ExampleTest extends \Tests\TestCase
         $this->get('/')->assertDontSee('Updated chirp');
     }
 
-    private function chirpId(Chirp $chirp): string
+    private function chirps(): ChirpContext
     {
-        $id = $chirp->id;
-        if (\is_int($id)) {
-            return (string) $id;
-        }
-        if (\is_string($id)) {
-            return $id;
+        $db = App::make(ChirpContext::class, []);
+        if ($db instanceof ChirpContext) {
+            return $db;
         }
 
-        throw new \RuntimeException('Expected a chirp id.');
+        throw new \RuntimeException('Expected a chirp context.');
     }
 }

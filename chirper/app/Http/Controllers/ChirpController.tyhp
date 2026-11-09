@@ -1,8 +1,9 @@
-<?tyhp 
+<?tyhp
 
 namespace App\Http\Controllers;
 
-use App\Models\Chirp;
+use App\Data\Chirp;
+use App\Data\ChirpContext;
 use App\Models\User;
 use Illuminate\Contracts\View\View as ViewContract;
 use Illuminate\Http\RedirectResponse;
@@ -19,9 +20,12 @@ class ChirpController extends Controller
      */
     public function index(): ViewContract
     {
-        $chirpsQuery = Chirp::with('user')->latest();
-        $chirpsQuery->getQuery()->take(50);
-        $chirps = $chirpsQuery->get();
+        $db = $this->chirps();
+        array<int, Chirp> $chirps = $db->chirps
+            ->with(fn ($chirp) => $chirp->user)
+            ->latest()
+            ->take(50)
+            ->all();
 
         return View::make('home', ['chirps' => $chirps], []);
     }
@@ -48,9 +52,12 @@ class ChirpController extends Controller
         $message = $this->stringValue($validated, 'message');
         $account = Auth::user();
         if ($account instanceof User) {
-            $account->chirps()->create([
-                'message' => $message,
-            ]);
+            $chirp = new Chirp();
+            $chirp->message = $message;
+            $chirp->userId = $this->accountId($account);
+            $db = $this->chirps();
+            $db->chirps->add($chirp);
+            $db->save();
 
             return Redirect::to('/', 302, [], null)->with('success', 'Your chirp has been posted!');
         }
@@ -63,32 +70,34 @@ class ChirpController extends Controller
      */
     public function show(string $id): void
     {
+        (void)$id;
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Chirp $chirp): ViewContract
+    public function edit(string $chirp): ViewContract
     {
-        $this->denyUnlessOwner($chirp);
+        $row = $this->findChirp($chirp);
+        $this->denyUnlessOwner($row);
 
-        return View::make('chirps.edit', ['chirp' => $chirp], []);
+        return View::make('chirps.edit', ['chirp' => $row], []);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Chirp $chirp): RedirectResponse
+    public function update(Request $request, string $chirp): RedirectResponse
     {
-        $this->denyUnlessOwner($chirp);
+        $row = $this->findChirp($chirp);
+        $this->denyUnlessOwner($row);
 
         $validated = $request->validate([
             'message' => 'required|string|max:255',
         ], []);
 
-        $chirp->update([
-            'message' => $this->stringValue($validated, 'message'),
-        ]);
+        $row->message = $this->stringValue($validated, 'message');
+        $this->chirps()->save();
 
         return Redirect::to('/', 302, [], null)->with('success', 'Chirp updated!');
     }
@@ -96,13 +105,42 @@ class ChirpController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Chirp $chirp): RedirectResponse
+    public function destroy(string $chirp): RedirectResponse
     {
-        $this->denyUnlessOwner($chirp);
+        $row = $this->findChirp($chirp);
+        $this->denyUnlessOwner($row);
 
-        $chirp->delete();
+        $db = $this->chirps();
+        $db->chirps->remove($row);
+        $db->save();
 
         return Redirect::to('/', 302, [], null)->with('success', 'Chirp deleted!');
+    }
+
+    private function chirps(): ChirpContext
+    {
+        $db = App::make(ChirpContext::class, []);
+        if ($db instanceof ChirpContext) {
+            return $db;
+        }
+
+        throw new \RuntimeException('Expected a chirp context.');
+    }
+
+    private function findChirp(string $id): Chirp
+    {
+        if (\ctype_digit($id) === false) {
+            App::abort(404, 'Chirp not found', []);
+            throw new \RuntimeException('Chirp not found.');
+        }
+
+        $found = $this->chirps()->chirps->find((int) $id);
+        if ($found instanceof Chirp) {
+            return $found;
+        }
+
+        App::abort(404, 'Chirp not found', []);
+        throw new \RuntimeException('Chirp not found.');
     }
 
     private function denyUnlessOwner(Chirp $chirp): void
@@ -115,19 +153,27 @@ class ChirpController extends Controller
     private function currentUserOwns(Chirp $chirp): bool
     {
         $actorId = Auth::id();
-        if ($actorId === null) {
-            return false;
+        if (\is_int($actorId)) {
+            return $chirp->userId === $actorId;
         }
-
-        $ownerId = $chirp->user_id;
-        if (\is_int($ownerId)) {
-            return $ownerId === $actorId;
-        }
-        if (\is_string($ownerId)) {
-            return $ownerId === $actorId;
+        if (\is_string($actorId) && \ctype_digit($actorId)) {
+            return $chirp->userId === (int) $actorId;
         }
 
         return false;
+    }
+
+    private function accountId(User $account): int
+    {
+        $id = $account->getKey();
+        if (\is_int($id)) {
+            return $id;
+        }
+        if (\is_string($id) && \ctype_digit($id)) {
+            return (int) $id;
+        }
+
+        throw new \RuntimeException('Expected a user id.');
     }
 
     private function stringValue(array $validated, string $key): string

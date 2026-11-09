@@ -5,8 +5,8 @@
         <div class="flex space-x-3">
             <div class="avatar">
                 <div class="size-10 rounded-full">
-                    <img src="https://avatars.laravel.cloud/{{ urlencode($chirp->user->email) }}?vibe=ocean"
-                        alt="{{ $chirp->user->name }}'s avatar" class="rounded-full" />
+                    <img src="https://avatars.laravel.cloud/{{ urlencode($chirp->user->email ?? '') }}?vibe=ocean"
+                        alt="{{ $chirp->user->name ?? '' }}'s avatar" class="rounded-full" />
                 </div>
             </div>
 
@@ -14,19 +14,21 @@
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-1">
                         <p class="text-sm font-semibold">
-                            {{ $chirp->user->name }}
+                            {{ $chirp->user->name ?? '' }}
                         </p>
                         <span class="text-base-content/60">·</span>
                         <p class="text-sm text-base-content/60">
-                            {{ $chirp->created_at->diffForHumans() }}
+                            @if ($chirp->createdAt instanceof \DateTimeImmutable)
+                                {{ \Illuminate\Support\Carbon::instance($chirp->createdAt)->diffForHumans() }}
+                            @endif
                         </p>
-                        @if ($chirp->updated_at->gt($chirp->created_at->addSeconds(5)))
+                        @if ($chirp->createdAt instanceof \DateTimeImmutable && $chirp->updatedAt instanceof \DateTimeImmutable && \Illuminate\Support\Carbon::instance($chirp->updatedAt)->gt(\Illuminate\Support\Carbon::instance($chirp->createdAt)->addSeconds(5)))
                             <span class="text-base-content/60">·</span>
                             <span class="text-sm text-base-content/60 italic">edited</span>
                         @endif
                     </div>
 
-                    @if (auth()->check() && auth()->id() === $chirp->user_id)
+                    @if (auth()->check() && (string) auth()->id() === (string) $chirp->userId)
                         <!-- Edit/Delete Buttons -->
                         <div class="flex gap-1">
                             <a href="/chirps/{{ $chirp->id }}/edit" class="btn btn-ghost btn-xs">

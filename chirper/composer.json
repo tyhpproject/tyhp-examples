@@ -9,7 +9,8 @@
         "tyhp/core": "805.0.3",
         "tyhp/async": "805.0.3",
         "tyhp/decimal": "805.0.3",
-        "tyhp/lambda": "805.0.3"
+        "tyhp/lambda": "805.0.3",
+        "tyhp/rhetoric": "805.0.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

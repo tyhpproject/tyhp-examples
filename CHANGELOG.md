@@ -4,6 +4,10 @@ Notable changes to the Tyhp example applications in this repository. The format 
 
 ## [Unreleased]
 
+### Changed
+
+- chirper: chirps use `tyhp/rhetoric` (`App\Data\Chirp`, `Author`, `ChirpContext`); `User` stays Eloquent for auth. `config/rhetoric.php` registers the context. `composer.json` requires `tyhp/rhetoric` 805.0.0.
+
 ## 2026-11-04
 
 ### Changed

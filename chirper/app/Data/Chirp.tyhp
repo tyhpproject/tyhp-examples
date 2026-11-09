@@ -1,0 +1,18 @@
+<?tyhp
+
+namespace App\Data;
+
+use Tyhp\Rhetoric\Attributes\MaxLength;
+use Tyhp\Rhetoric\Attributes\Timestamps;
+
+#[Timestamps]
+class Chirp
+{
+    public int $id = 0;
+    public int $userId = 0;
+    #[MaxLength(255)]
+    public string $message = '';
+    public ?\DateTimeImmutable $createdAt = null;
+    public ?\DateTimeImmutable $updatedAt = null;
+    public ?Author $user = null;
+}
