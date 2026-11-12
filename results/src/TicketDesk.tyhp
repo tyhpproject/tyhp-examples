@@ -54,15 +54,15 @@ class TicketDesk {
 
     private function read(): TicketFile {
         if (!\is_file($this->path)) {
-            return new TicketFile();
+            return new TicketFile[];
         }
         $raw = \file_get_contents($this->path);
         if ($raw === false || $raw->isEmpty()) {
-            return new TicketFile();
+            return new TicketFile[];
         }
-        TicketFile $file = new TicketFile();
+        TicketFile $file = new TicketFile[];
         if (!$raw->jsonTryDecodeAs<TicketFile>($file)) {
-            return new TicketFile();
+            return new TicketFile[];
         }
         return $file;
     }
@@ -70,14 +70,14 @@ class TicketDesk {
     private function write(MemoryRepository<Ticket> $repo): void {
         array<TicketRecord> $records = [];
         foreach ($repo->rows() as $ticket) {
-            $records[] = new TicketRecord() with [
+            $records[] = new TicketRecord[
                 id => $ticket->id,
                 title => $ticket->title,
                 requester => $ticket->requester,
                 state => $ticket->state->value,
             ];
         }
-        $file = new TicketFile() with [tickets => $records];
+        $file = new TicketFile[tickets => $records];
         $json = \json_encode($file, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
         if ($json === false) {
             throw new \RuntimeException('Could not encode tickets.');

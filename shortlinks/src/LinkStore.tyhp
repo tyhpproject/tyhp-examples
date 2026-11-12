@@ -58,15 +58,15 @@ class LinkStore {
 
     private function read(): LinkFile {
         if (!\is_file($this->path)) {
-            return new LinkFile();
+            return new LinkFile[];
         }
         $raw = \file_get_contents($this->path);
         if ($raw === false || $raw->isEmpty()) {
-            return new LinkFile();
+            return new LinkFile[];
         }
-        LinkFile $file = new LinkFile();
+        LinkFile $file = new LinkFile[];
         if (!$raw->jsonTryDecodeAs<LinkFile>($file)) {
-            return new LinkFile();
+            return new LinkFile[];
         }
         return $file;
     }
@@ -74,13 +74,13 @@ class LinkStore {
     private function write(array<Link> $links): void {
         array<LinkRecord> $records = [];
         foreach ($links as $link) {
-            $records[] = new LinkRecord() with [
+            $records[] = new LinkRecord[
                 code => $link->code,
                 target => $link->target,
                 createdAt => $link->createdAt,
             ];
         }
-        $file = new LinkFile() with [links => $records];
+        $file = new LinkFile[links => $records];
         $json = \json_encode($file, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
         if ($json === false) {
             throw new \RuntimeException('Could not encode links.');

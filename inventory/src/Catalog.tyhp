@@ -83,15 +83,15 @@ class Catalog {
 
     private function read(): ItemFile {
         if (!\is_file($this->path)) {
-            return new ItemFile();
+            return new ItemFile[];
         }
         $raw = \file_get_contents($this->path);
         if ($raw === false || $raw->isEmpty()) {
-            return new ItemFile();
+            return new ItemFile[];
         }
-        ItemFile $file = new ItemFile();
+        ItemFile $file = new ItemFile[];
         if (!$raw->jsonTryDecodeAs<ItemFile>($file)) {
-            return new ItemFile();
+            return new ItemFile[];
         }
         return $file;
     }
@@ -99,14 +99,14 @@ class Catalog {
     private function write(array<Item> $items): void {
         array<ItemRecord> $records = [];
         foreach ($items as $item) {
-            $records[] = new ItemRecord() with [
+            $records[] = new ItemRecord[
                 sku => $item->sku,
                 name => $item->name,
                 quantity => $item->quantity,
                 location => $item->location,
             ];
         }
-        $file = new ItemFile() with [items => $records];
+        $file = new ItemFile[items => $records];
         $json = \json_encode($file, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
         if ($json === false) {
             throw new \RuntimeException('Could not encode inventory.');

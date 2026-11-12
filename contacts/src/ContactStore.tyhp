@@ -52,15 +52,15 @@ class ContactStore {
 
     private function read(): ContactFile {
         if (!\is_file($this->path)) {
-            return new ContactFile();
+            return new ContactFile[];
         }
         $raw = \file_get_contents($this->path);
         if ($raw === false || $raw->isEmpty()) {
-            return new ContactFile();
+            return new ContactFile[];
         }
-        ContactFile $file = new ContactFile();
+        ContactFile $file = new ContactFile[];
         if (!$raw->jsonTryDecodeAs<ContactFile>($file)) {
-            return new ContactFile();
+            return new ContactFile[];
         }
         return $file;
     }
@@ -68,7 +68,7 @@ class ContactStore {
     private function write(array<Contact> $contacts): void {
         array<ContactRecord> $records = [];
         foreach ($contacts as $contact) {
-            $records[] = new ContactRecord() with [
+            $records[] = new ContactRecord[
                 id => $contact->id,
                 name => $contact->name,
                 email => $contact->email,
@@ -76,7 +76,7 @@ class ContactStore {
                 company => $contact->company,
             ];
         }
-        $file = new ContactFile() with [contacts => $records];
+        $file = new ContactFile[contacts => $records];
         string $json = \json_encode($file, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
         $written = \file_put_contents($this->path, $json . "\n");
         if ($written === false) {

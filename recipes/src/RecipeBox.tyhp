@@ -72,15 +72,15 @@ class RecipeBox {
 
     private function read(): RecipeBoxFile {
         if (!\is_file($this->path)) {
-            return new RecipeBoxFile();
+            return new RecipeBoxFile[];
         }
         $raw = \file_get_contents($this->path);
         if ($raw === false || $raw->isEmpty()) {
-            return new RecipeBoxFile();
+            return new RecipeBoxFile[];
         }
-        RecipeBoxFile $file = new RecipeBoxFile();
+        RecipeBoxFile $file = new RecipeBoxFile[];
         if (!$raw->jsonTryDecodeAs<RecipeBoxFile>($file)) {
-            return new RecipeBoxFile();
+            return new RecipeBoxFile[];
         }
         return $file;
     }
@@ -90,13 +90,13 @@ class RecipeBox {
         foreach ($recipes as $recipe) {
             array<IngredientRecord> $lines = [];
             foreach ($recipe->ingredients as $ingredient) {
-                $lines[] = new IngredientRecord() with [
+                $lines[] = new IngredientRecord[
                     quantity => $ingredient->quantity,
                     unit => $ingredient->unit,
                     name => $ingredient->name,
                 ];
             }
-            $records[] = new RecipeRecord() with [
+            $records[] = new RecipeRecord[
                 id => $recipe->id,
                 title => $recipe->title,
                 servings => $recipe->servings,
@@ -104,7 +104,7 @@ class RecipeBox {
                 ingredients => $lines,
             ];
         }
-        $file = new RecipeBoxFile() with [recipes => $records];
+        $file = new RecipeBoxFile[recipes => $records];
         $json = \json_encode($file, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
         if ($json === false) {
             throw new \RuntimeException('Could not encode recipes.');

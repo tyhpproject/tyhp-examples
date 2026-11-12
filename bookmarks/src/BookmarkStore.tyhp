@@ -53,13 +53,13 @@ class BookmarkStore {
 
     private function read(): BookmarkFile {
         if (!\is_file($this->path)) {
-            return new BookmarkFile();
+            return new BookmarkFile[];
         }
         $raw = \file_get_contents($this->path);
         if ($raw === false || $raw->isEmpty()) {
-            return new BookmarkFile();
+            return new BookmarkFile[];
         }
-        BookmarkFile $file = new BookmarkFile();
+        BookmarkFile $file = new BookmarkFile[];
         if (!$raw->jsonTryDecodeAs<BookmarkFile>($file)) {
             throw new \RuntimeException('Could not read bookmarks from ' . $this->path);
         }
@@ -69,7 +69,7 @@ class BookmarkStore {
     private function write(array<Bookmark> $bookmarks): void {
         array<BookmarkRecord> $records = [];
         foreach ($bookmarks as $bookmark) {
-            $records[] = new BookmarkRecord() with [
+            $records[] = new BookmarkRecord[
                 id => $bookmark->id,
                 title => $bookmark->title,
                 url => $bookmark->url,
@@ -78,7 +78,7 @@ class BookmarkStore {
                 savedAt => $bookmark->savedAt,
             ];
         }
-        $file = new BookmarkFile() with [bookmarks => $records];
+        $file = new BookmarkFile[bookmarks => $records];
         $json = \json_encode($file, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
         if ($json === false) {
             throw new \RuntimeException('Could not encode bookmarks.');

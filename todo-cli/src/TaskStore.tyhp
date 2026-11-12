@@ -68,15 +68,15 @@ class TaskStore {
 
     private function read(): TaskFile {
         if (!\is_file($this->path)) {
-            return new TaskFile();
+            return new TaskFile[];
         }
         $raw = \file_get_contents($this->path);
         if ($raw === false || $raw->isEmpty()) {
-            return new TaskFile();
+            return new TaskFile[];
         }
-        TaskFile $file = new TaskFile();
+        TaskFile $file = new TaskFile[];
         if (!$raw->jsonTryDecodeAs<TaskFile>($file)) {
-            return new TaskFile();
+            return new TaskFile[];
         }
         return $file;
     }
@@ -84,14 +84,14 @@ class TaskStore {
     private function write(array<Task> $tasks): void {
         array<TaskRecord> $records = [];
         foreach ($tasks as $task) {
-            $records[] = new TaskRecord() with [
+            $records[] = new TaskRecord[
                 id => $task->id,
                 title => $task->title,
                 status => $task->status->value,
                 createdAt => $task->createdAt,
             ];
         }
-        $file = new TaskFile() with [tasks => $records];
+        $file = new TaskFile[tasks => $records];
         $json = \json_encode($file, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
         if ($json === false) {
             throw new \RuntimeException('Could not encode todos.');

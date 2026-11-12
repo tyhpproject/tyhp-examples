@@ -7,6 +7,14 @@ Notable changes to the Tyhp example applications in this repository. The format 
 ### Changed
 
 - chirper: chirps use `tyhp/rhetoric` (`App\Data\Chirp`, `Author`, `ChirpContext`); `User` stays Eloquent for auth. `config/rhetoric.php` registers the context. `composer.json` requires `tyhp/rhetoric` 805.0.0.
+- todo-cli: file structs are constructed with bracket initializers (`new TaskRecord[field => value]`, `new TaskFile[]`). Commands and saved JSON are unchanged. Requires a Tyhp compiler that accepts that form.
+- bookmarks: file structs are constructed with bracket initializers (`new BookmarkRecord[field => value]`, `new BookmarkFile[]`). Commands and saved JSON are unchanged. Requires a Tyhp compiler that accepts that form.
+- expenses: file structs are constructed with bracket initializers (`new ExpenseRecord[field => value]`, `new ExpenseFile[]`). Commands and saved JSON are unchanged. Requires a Tyhp compiler that accepts that form.
+- contacts: file structs are constructed with bracket initializers (`new ContactRecord[field => value]`, `new ContactFile[]`). Commands and saved JSON are unchanged. Requires a Tyhp compiler that accepts that form.
+- inventory: file structs are constructed with bracket initializers (`new ItemRecord[field => value]`, `new ItemFile[]`). Commands and saved JSON are unchanged. Requires a Tyhp compiler that accepts that form.
+- shortlinks: file structs are constructed with bracket initializers (`new LinkRecord[field => value]`, `new LinkFile[]`). Commands and saved JSON are unchanged. Requires a Tyhp compiler that accepts that form.
+- results: file structs are constructed with bracket initializers (`new TicketRecord[field => value]`, `new TicketFile[]`). Commands and saved JSON are unchanged. Requires a Tyhp compiler that accepts that form.
+- recipes: file structs are constructed with bracket initializers (`new IngredientRecord[field => value]`, `new RecipeRecord[field => value]`, `new RecipeBoxFile[]`). Commands and saved JSON are unchanged. Requires a Tyhp compiler that accepts that form.
 
 ## 2026-11-04
 

@@ -60,16 +60,16 @@ class ExpenseStore {
 
     private function read(): ExpenseFile {
         if (!\is_file($this->path)) {
-            return new ExpenseFile();
+            return new ExpenseFile[];
         }
         $raw = \file_get_contents($this->path);
         if ($raw === false) {
             throw new \RuntimeException('Could not read ' . $this->path);
         }
         if ($raw->isEmpty()) {
-            return new ExpenseFile();
+            return new ExpenseFile[];
         }
-        ExpenseFile $loaded = new ExpenseFile();
+        ExpenseFile $loaded = new ExpenseFile[];
         if (!$raw->jsonTryDecodeAs<ExpenseFile>($loaded)) {
             throw new \RuntimeException('Could not read expenses from ' . $this->path);
         }
@@ -80,7 +80,7 @@ class ExpenseStore {
         array<ExpenseRecord> $records = [];
         foreach ($expenses as $expense) {
             string $amount = $expense->amount->format(2, '.', '');
-            $records[] = new ExpenseRecord() with [
+            $records[] = new ExpenseRecord[
                 id => $expense->id,
                 payee => $expense->payee,
                 category => $expense->category->value,
@@ -88,7 +88,7 @@ class ExpenseStore {
                 note => $expense->note,
             ];
         }
-        $file = new ExpenseFile() with [expenses => $records];
+        $file = new ExpenseFile[expenses => $records];
         $json = \json_encode($file, \JSON_THROW_ON_ERROR);
         $written = \file_put_contents($this->path, $json . "\n");
         if ($written === false) {
